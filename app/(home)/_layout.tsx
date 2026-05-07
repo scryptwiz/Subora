@@ -9,8 +9,20 @@ export default function Layout() {
     }
 
     if (!isSignedIn) {
-        return <Redirect href="/(auth)/sign-in" />
+        return <Redirect href='/(auth)/sign-in' />
     }
 
-    return <Stack />
+    return (
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#111111' } }}>
+            <Stack.Screen name='(tabs)' />
+            <Stack.Screen
+                name='add-subscription'
+                options={{
+                    presentation: 'modal',
+                    animation: 'slide_from_bottom',
+                    contentStyle: { backgroundColor: '#111111' },
+                }}
+            />
+        </Stack>
+    )
 }
