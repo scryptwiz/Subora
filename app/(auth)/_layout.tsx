@@ -12,5 +12,19 @@ export default function AuthRoutesLayout() {
         return <Redirect href={'/'} />
     }
 
-    return <Stack screenOptions={{ headerShown: false }} />
+    return (
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+                name='email-sign-in'
+                options={{
+                    headerShown: true,
+                    headerBackTitle: 'Back',
+                    headerTintColor: '#ffffff',
+                    headerStyle: { backgroundColor: '#111111' },
+                    headerShadowVisible: false,
+                    title: '',
+                }}
+            />
+        </Stack>
+    )
 }

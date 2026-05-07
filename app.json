@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kelvin.subora"
+      "bundleIdentifier": "com.kelvin.subora",
+      "appleTeamId": "QLU8U78UTP"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +29,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "@clerk/expo",
+        {
+          "iosUrlScheme": "subora"
+        }
+      ],
       [
         "expo-splash-screen",
         {

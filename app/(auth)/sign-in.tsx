@@ -44,7 +44,7 @@ export default function SignInPage() {
     }
 
     const handleEmailContinue = () => {
-        Alert.alert('Continue with Email', 'Email sign-in flow will be added next.')
+        router.push('/email-sign-in')
     }
 
     return (
