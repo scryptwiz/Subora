@@ -7,10 +7,9 @@
     "icon": "./assets/images/ios.png",
     "scheme": "subora",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kelvinomenai.subora"
+      "bundleIdentifier": "com.kelvin.subora"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,11 +18,11 @@
         "backgroundImage": "./assets/images/adaptive-icon.png",
         "monochromeImage": "./assets/images/adaptive-icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.kelvinomenai.subora"
+      "package": "com.kelvin.subora"
     },
     "web": {
+      "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
@@ -40,7 +39,10 @@
             "backgroundColor": "#111111"
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
