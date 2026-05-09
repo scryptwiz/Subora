@@ -3,6 +3,8 @@ import { tokenCache } from '@clerk/expo/token-cache'
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold, useFonts } from '@expo-google-fonts/inter'
 import { Slot } from 'expo-router'
 import "../global.css"
+import { EdgeSwipeBack } from '../components/edge-swipe-back'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
 
@@ -22,8 +24,12 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Slot />
-    </ClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <EdgeSwipeBack>
+          <Slot />
+        </EdgeSwipeBack>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   )
 }

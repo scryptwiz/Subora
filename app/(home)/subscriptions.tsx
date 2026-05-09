@@ -3,13 +3,13 @@ import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { SubscriptionRow } from '../../../components/subscriptions/subscription-row'
+import { SubscriptionRow } from '../../components/subscriptions/subscription-row'
 import {
     DEMO_SUBSCRIPTIONS,
     formatCurrency,
     totalMonthly,
     type Subscription,
-} from '../../../lib/subscriptions'
+} from '../../lib/subscriptions'
 
 type Filter = 'all' | 'active' | 'paused'
 
@@ -69,7 +69,6 @@ export default function SubscriptionsScreen() {
                     </Pressable>
                 </View>
 
-                {/* Search */}
                 <View className='mt-5 flex-row items-center gap-3 rounded-2xl border border-[#27272A] bg-[#16161A] px-4'>
                     <Feather name='search' size={18} color='#52525B' />
                     <TextInput
@@ -88,7 +87,6 @@ export default function SubscriptionsScreen() {
                     )}
                 </View>
 
-                {/* Filters */}
                 <View className='mt-4 flex-row gap-2'>
                     {FILTERS.map(f => {
                         const active = filter === f.id
@@ -114,7 +112,7 @@ export default function SubscriptionsScreen() {
                 contentContainerStyle={{
                     paddingHorizontal: 20,
                     paddingTop: 12,
-                    paddingBottom: 140,
+                    paddingBottom: 40,
                     gap: 10,
                 }}
                 showsVerticalScrollIndicator={false}

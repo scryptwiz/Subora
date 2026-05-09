@@ -1,18 +1,22 @@
-import { Feather } from '@expo/vector-icons'
+import { Entypo, Feather, FontAwesome } from '@expo/vector-icons'
 import { Tabs, useRouter } from 'expo-router'
 import React from 'react'
-import { Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const ACTIVE = '#FFFFFF'
-const INACTIVE = '#52525B'
-const TAB_HEIGHT = 64
+const INACTIVE = '#2F3238'
+const TAB_HEIGHT = 68
+/** Side tabs — one size so Home / Profile match visually */
+const TAB_ICON_SIZE = 26
+/** Center FAB — slightly larger, proportional to side icons */
+const FAB_ICON_SIZE = Math.round(TAB_ICON_SIZE * 1.35)
 
 export default function TabsLayout() {
     const insets = useSafeAreaInsets()
     const router = useRouter()
 
-    const bottomInset = Math.max(insets.bottom, 12)
+    const bottomInset = Math.max(insets.bottom, 10)
 
     return (
         <View className='flex-1 bg-[#111111]'>
@@ -23,13 +27,22 @@ export default function TabsLayout() {
                     tabBarActiveTintColor: ACTIVE,
                     tabBarInactiveTintColor: INACTIVE,
                     tabBarStyle: {
-                        backgroundColor: '#0E0E10',
-                        borderTopColor: '#1F1F22',
-                        borderTopWidth: StyleSheet.hairlineWidth,
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: '#111317',
+                        borderTopWidth: 0,
+                        borderTopColor: 'transparent',
+                        borderRadius: 0,
                         height: TAB_HEIGHT + bottomInset,
-                        paddingTop: 10,
+                        paddingTop: 8,
                         paddingBottom: bottomInset,
+                        paddingHorizontal: 0,
+                        elevation: 0,
                     },
+                    tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+                    tabBarIconStyle: { marginTop: 8 },
                     sceneStyle: { backgroundColor: '#111111' },
                 }}
             >
@@ -37,68 +50,38 @@ export default function TabsLayout() {
                     name='index'
                     options={{
                         title: 'Home',
-                        tabBarIcon: ({ color }) => <Feather name='home' size={22} color={color} />,
+                        tabBarIcon: ({ color }) => <Entypo name='home' size={TAB_ICON_SIZE} color={color} />,
                     }}
                 />
                 <Tabs.Screen
-                    name='subscriptions'
+                    name='create'
                     options={{
-                        title: 'Subscriptions',
-                        tabBarIcon: ({ color }) => <Feather name='grid' size={22} color={color} />,
+                        title: 'Add',
+                        tabBarButton: () => (
+                            <View className='flex-1 items-center justify-center'>
+                                <Pressable
+                                    onPress={() => router.push('/(home)/add-subscription')}
+                                    accessibilityRole='button'
+                                    accessibilityLabel='Add subscription'
+                                    className='-mt-9 h-[76px] w-[76px] items-center justify-center rounded-full bg-white'
+                                    style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+                                >
+                                    <Feather name='plus' size={FAB_ICON_SIZE} color='#111111' />
+                                </Pressable>
+                            </View>
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name='profile'
                     options={{
                         title: 'Profile',
-                        tabBarIcon: ({ color }) => <Feather name='user' size={22} color={color} />,
+                        tabBarIcon: ({ color }) => (
+                            <FontAwesome name='user' size={TAB_ICON_SIZE} color={color} />
+                        ),
                     }}
                 />
             </Tabs>
-
-            {/* Floating action button — opens the Add Subscription modal */}
-            <View
-                pointerEvents='box-none'
-                style={{
-                    position: 'absolute',
-                    right: 20,
-                    bottom: TAB_HEIGHT + bottomInset + 12,
-                }}
-            >
-                <Pressable
-                    onPress={() => router.push('/(home)/add-subscription')}
-                    accessibilityRole='button'
-                    accessibilityLabel='Add subscription'
-                    style={({ pressed }) => [
-                        styles.fab,
-                        pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] },
-                    ]}
-                >
-                    <Feather name='plus' size={24} color='#111111' />
-                </Pressable>
-            </View>
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    fab: {
-        height: 56,
-        width: 56,
-        borderRadius: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOpacity: 0.4,
-                shadowRadius: 14,
-                shadowOffset: { width: 0, height: 8 },
-            },
-            android: {
-                elevation: 12,
-            },
-        }),
-    },
-})

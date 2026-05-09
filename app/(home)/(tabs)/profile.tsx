@@ -1,10 +1,12 @@
 import { useClerk, useUser } from '@clerk/expo'
 import { Feather } from '@expo/vector-icons'
+import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
+import React, { useRef } from 'react'
+import { Alert, Animated, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ScrollRevealTopChrome } from '../../../components/scroll-reveal-top-chrome'
 import { avatarColor, initials } from '../../../lib/logo'
 import {
     DEMO_SUBSCRIPTIONS,
@@ -66,6 +68,11 @@ export default function ProfileScreen() {
     const router = useRouter()
     const { user } = useUser()
     const { signOut } = useClerk()
+    const scrollY = useRef(new Animated.Value(0)).current
+
+    const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: false,
+    })
 
     const displayName = user?.fullName ?? user?.firstName ?? user?.username ?? 'Subora user'
     const email = user?.primaryEmailAddress?.emailAddress ?? '—'
@@ -93,19 +100,35 @@ export default function ProfileScreen() {
     }
 
     return (
-        <ScrollView
-            className='flex-1 bg-[#111111]'
-            contentContainerStyle={{
-                paddingTop: insets.top + 16,
-                paddingHorizontal: 20,
-                paddingBottom: 140,
-                gap: 24,
-            }}
-            showsVerticalScrollIndicator={false}
-        >
-            <Text className='font-inter-bold text-2xl text-white'>Profile</Text>
+        <View className='flex-1 bg-[#111111]'>
+            <Animated.ScrollView
+                className='flex-1'
+                contentContainerStyle={{
+                    paddingTop: insets.top + 16,
+                    paddingHorizontal: 20,
+                    paddingBottom: insets.bottom + 126,
+                    gap: 24,
+                }}
+                scrollEventThrottle={16}
+                onScroll={onScroll}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps='handled'
+            >
+                <View className='flex-row items-center justify-between gap-3'>
+                    <Text className='min-w-0 flex-1 font-inter-bold text-2xl text-white'>Profile</Text>
+                    <Pressable
+                        accessibilityRole='button'
+                        accessibilityLabel='Settings'
+                        className='h-11 w-11 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]'
+                        hitSlop={8}
+                        onPress={() => void Haptics.selectionAsync()}
+                        style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+                    >
+                        <Feather name='settings' size={18} color='#FFFFFF' />
+                    </Pressable>
+                </View>
 
-            {/* Profile card */}
+                {/* Profile card */}
             <View className='items-center gap-3 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6'>
                 {user?.imageUrl ? (
                     <Image
@@ -196,7 +219,10 @@ export default function ProfileScreen() {
                 <SettingsRow icon='log-out' title='Sign out' onPress={confirmSignOut} danger />
             </SectionCard>
 
-            <Text className='text-center font-inter text-xs text-neutral-600'>Subora · v1.0.0</Text>
-        </ScrollView>
+                <Text className='text-center font-inter text-xs text-neutral-600'>Subora · v1.0.0</Text>
+            </Animated.ScrollView>
+
+            <ScrollRevealTopChrome scrollY={scrollY} topInset={insets.top} />
+        </View>
     )
 }

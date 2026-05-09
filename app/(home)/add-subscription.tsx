@@ -81,7 +81,7 @@ export default function AddSubscriptionScreen() {
             <ScrollView
                 className='flex-1'
                 contentContainerStyle={{
-                    paddingTop: insets.top + 12,
+                    paddingTop: (Platform.OS === 'ios' ? 0 : insets.top) + 24,
                     paddingHorizontal: 20,
                     paddingBottom: 40,
                     gap: 24,
