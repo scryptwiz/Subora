@@ -1,5 +1,6 @@
 import { BrandPreviewCard } from '@/components/add-subscription/brand-preview-card'
 import { DatePickerRow } from '@/components/add-subscription/date-picker-row'
+import { EmojiPickerModal } from '@/components/add-subscription/emoji-picker-modal'
 import { DetailRow, FieldLabel, RowDivider } from '@/components/add-subscription/form-fields'
 import { PresetChips } from '@/components/add-subscription/preset-chips'
 import { PriceAndCycleFields } from '@/components/add-subscription/price-and-cycle-fields'
@@ -49,6 +50,8 @@ export default function AddSubscriptionScreen() {
     const [domainInput, setDomainInput] = useState('')
     const [iconSlug, setIconSlug] = useState<string | undefined>(undefined)
     const [brandColor, setBrandColor] = useState<string | undefined>(undefined)
+    const [emoji, setEmoji] = useState<string | undefined>(undefined)
+    const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
     const [price, setPrice] = useState('')
     const [cycle, setCycle] = useState<BillingCycle>('month')
     const [currency, setCurrency] = useState(DEFAULT_CURRENCY)
@@ -80,6 +83,7 @@ export default function AddSubscriptionScreen() {
         setDomainInput(editingSubscription.domain ?? '')
         setIconSlug(editingSubscription.iconSlug)
         setBrandColor(editingSubscription.brandColor)
+        setEmoji(editingSubscription.emoji)
         setPrice(String(editingSubscription.price))
         setCycle(editingSubscription.billingCycle)
         setCurrency(editingSubscription.currency.toUpperCase() || DEFAULT_CURRENCY)
@@ -104,6 +108,7 @@ export default function AddSubscriptionScreen() {
         setDomainInput(preset.domain)
         setIconSlug(preset.iconSlug)
         setBrandColor(preset.brandColor)
+        setEmoji(undefined)
     }
 
     const clearLogoIfNameEdited = (next: string) => {
@@ -112,6 +117,12 @@ export default function AddSubscriptionScreen() {
             setBrandColor(undefined)
         }
         setName(next)
+    }
+
+    const handleEmojiSelect = (next: string) => {
+        setEmoji(next)
+        setIconSlug(undefined)
+        setBrandColor(undefined)
     }
 
     const handleSave = async () => {
@@ -134,6 +145,7 @@ export default function AddSubscriptionScreen() {
                     domain: domain ?? '',
                     iconSlug: iconSlug ?? undefined,
                     brandColor: brandColor ?? undefined,
+                    emoji: emoji ?? undefined,
                     price: priceNumber,
                     currency: currency.toUpperCase(),
                     billingCycle: cycle,
@@ -147,6 +159,7 @@ export default function AddSubscriptionScreen() {
                     plan: undefined,
                     iconSlug,
                     brandColor,
+                    emoji,
                     price: priceNumber,
                     currency: currency.toUpperCase(),
                     billingCycle: cycle,
@@ -213,6 +226,8 @@ export default function AddSubscriptionScreen() {
                     effectiveDomain={effectiveDomain}
                     iconSlug={iconSlug}
                     brandColor={brandColor}
+                    emoji={emoji}
+                    onPressLogo={() => setEmojiPickerOpen(true)}
                 />
 
                 <View className='gap-3'>
@@ -308,6 +323,14 @@ export default function AddSubscriptionScreen() {
                     )}
                 </Pressable>
             </ScrollView>
+
+            <EmojiPickerModal
+                visible={emojiPickerOpen}
+                selected={emoji}
+                onClose={() => setEmojiPickerOpen(false)}
+                onSelect={handleEmojiSelect}
+                onClear={() => setEmoji(undefined)}
+            />
         </KeyboardAvoidingView>
     )
 }

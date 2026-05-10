@@ -7,6 +7,8 @@ type SubscriptionLogoProps = {
     name: string
     domain?: string
     iconSlug?: string
+    /** When set, takes priority over every other logo source. */
+    emoji?: string
     /** Override colour for the surrounding tile. Defaults to a neutral chip. */
     tint?: string
     size?: number
@@ -15,16 +17,17 @@ type SubscriptionLogoProps = {
 }
 
 /**
- * Renders the best available logo for a subscription with a graceful fallback.
- *
- * - Tries the simpleicons CDN first (crisp coloured brand SVG).
- * - Falls back to a favicon for the given domain.
- * - Falls back to a deterministic letter tile if everything fails.
+ * Renders the best available logo for a subscription with a graceful fallback chain:
+ * 1. user-picked emoji
+ * 2. simpleicons CDN (crisp coloured brand SVG)
+ * 3. favicon for the given domain
+ * 4. deterministic letter tile
  */
 export function SubscriptionLogo({
     name,
     domain,
     iconSlug,
+    emoji,
     tint,
     size = 44,
     bleed = false,
@@ -32,8 +35,27 @@ export function SubscriptionLogo({
     const sources = useMemo<ImageSource[]>(() => logoSources({ iconSlug, domain }), [iconSlug, domain])
     const [failed, setFailed] = useState(false)
 
-    const bg = bleed ? (tint ?? avatarColor(name)) : '#1F1F22'
     const radius = Math.round(size * 0.28)
+
+    if (emoji) {
+        return (
+            <View
+                className='items-center justify-center overflow-hidden'
+                style={{
+                    width: size,
+                    height: size,
+                    borderRadius: radius,
+                    backgroundColor: bleed ? (tint ?? avatarColor(name)) : '#1F1F22',
+                }}
+            >
+                <Text style={{ fontSize: Math.round(size * 0.55), lineHeight: Math.round(size * 0.7) }}>
+                    {emoji}
+                </Text>
+            </View>
+        )
+    }
+
+    const bg = bleed ? (tint ?? avatarColor(name)) : '#1F1F22'
     const showFallback = failed || sources.length === 0
 
     return (

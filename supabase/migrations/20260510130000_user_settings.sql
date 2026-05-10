@@ -13,6 +13,7 @@ ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "user_settings_select_own" ON public.user_settings;
 DROP POLICY IF EXISTS "user_settings_insert_own" ON public.user_settings;
 DROP POLICY IF EXISTS "user_settings_update_own" ON public.user_settings;
+DROP POLICY IF EXISTS "user_settings_delete_own" ON public.user_settings;
 
 CREATE POLICY "user_settings_select_own"
     ON public.user_settings
@@ -33,7 +34,13 @@ CREATE POLICY "user_settings_update_own"
     USING ((SELECT auth.jwt()->>'sub') = user_id)
     WITH CHECK ((SELECT auth.jwt()->>'sub') = user_id);
 
-GRANT SELECT, INSERT, UPDATE ON TABLE public.user_settings TO authenticated;
+CREATE POLICY "user_settings_delete_own"
+    ON public.user_settings
+    FOR DELETE
+    TO authenticated
+    USING ((SELECT auth.jwt()->>'sub') = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_settings TO authenticated;
 
 GRANT ALL ON TABLE public.user_settings TO service_role;
 

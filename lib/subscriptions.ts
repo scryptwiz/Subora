@@ -12,6 +12,8 @@ export type Subscription = {
     iconSlug?: string
     /** Brand colour used for the logo background tile when no logo is available. */
     brandColor?: string
+    /** Optional user-picked emoji used as the logo (takes priority over favicon/iconSlug). */
+    emoji?: string
     price: number
     currency: string
     billingCycle: BillingCycle

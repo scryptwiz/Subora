@@ -42,6 +42,7 @@ export function SubscriptionRow({
                 name={subscription.name}
                 domain={subscription.domain}
                 iconSlug={subscription.iconSlug}
+                emoji={subscription.emoji}
                 size={44}
             />
 

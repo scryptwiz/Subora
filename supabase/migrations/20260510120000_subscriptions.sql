@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     next_renewal timestamptz NOT NULL,
     active boolean NOT NULL DEFAULT true,
     payment_method text,
+    emoji text,
     created_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
     updated_at timestamptz NOT NULL DEFAULT timezone('utc', now())
 );

@@ -15,6 +15,7 @@ export type SubscriptionRow = {
     next_renewal: string
     active: boolean
     payment_method: string | null
+    emoji?: string | null
     created_at?: string | null
 }
 
@@ -26,6 +27,7 @@ export function rowToSubscription(row: SubscriptionRow): Subscription {
         domain: row.domain ?? undefined,
         iconSlug: row.icon_slug ?? undefined,
         brandColor: row.brand_color ?? undefined,
+        emoji: row.emoji ?? undefined,
         price: typeof row.price === 'number' ? row.price : Number(row.price),
         currency: row.currency,
         billingCycle: row.billing_cycle,

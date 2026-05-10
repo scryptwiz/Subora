@@ -18,6 +18,7 @@ export type InsertSubscriptionInput = {
     domain?: string
     iconSlug?: string
     brandColor?: string
+    emoji?: string
     price: number
     currency?: string
     billingCycle: BillingCycle
@@ -112,6 +113,9 @@ export function SubscriptionsProvider({ children }: { children: ReactNode }) {
                         ...(patch.brandColor !== undefined
                             ? { brandColor: patch.brandColor ?? undefined }
                             : null),
+                        ...(patch.emoji !== undefined
+                            ? { emoji: patch.emoji ?? undefined }
+                            : null),
                         ...(patch.price !== undefined ? { price: patch.price } : null),
                         ...(patch.currency !== undefined
                             ? { currency: patch.currency }
@@ -148,6 +152,7 @@ export function SubscriptionsProvider({ children }: { children: ReactNode }) {
                 domain: input.domain?.trim() ? input.domain.trim() : null,
                 icon_slug: input.iconSlug ?? null,
                 brand_color: input.brandColor ?? null,
+                emoji: input.emoji ?? null,
                 price: input.price,
                 currency: input.currency ?? 'USD',
                 billing_cycle: input.billingCycle,
@@ -176,6 +181,7 @@ export function SubscriptionsProvider({ children }: { children: ReactNode }) {
             }
             if (input.iconSlug !== undefined) payload.icon_slug = input.iconSlug ?? null
             if (input.brandColor !== undefined) payload.brand_color = input.brandColor ?? null
+            if (input.emoji !== undefined) payload.emoji = input.emoji ?? null
             if (input.price !== undefined) payload.price = input.price
             if (input.currency !== undefined) payload.currency = input.currency
             if (input.billingCycle !== undefined) payload.billing_cycle = input.billingCycle

@@ -1,7 +1,11 @@
 import { CurrencyPickerModal } from '@/components/profile/currency-picker-modal'
+import { DeleteAccountModal } from '@/components/profile/delete-account-modal'
+import { EditProfileModal } from '@/components/profile/edit-profile-modal'
 import { getCurrencyOption } from '@/constants/currencies'
 import { usePreferences } from '@/contexts/preferences-context'
-import { useClerk, useUser } from '@clerk/expo'
+import { useSupabase } from '@/hooks/use-supabase'
+import { deleteAccount } from '@/lib/delete-account'
+import { isClerkAPIResponseError, useAuth, useClerk, useUser } from '@clerk/expo'
 import { Feather } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
@@ -64,21 +68,52 @@ export default function ProfileScreen() {
     const router = useRouter()
     const { user } = useUser()
     const { signOut } = useClerk()
+    const { userId } = useAuth()
+    const supabase = useSupabase()
     const scrollY = useRef(new Animated.Value(0)).current
 
     const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
         useNativeDriver: false,
     })
 
-    const displayName = user?.fullName ?? user?.firstName ?? user?.username ?? 'Subora user'
+    const displayName = user?.fullName ?? user?.firstName ?? user?.username ?? 'User name'
     const email = user?.primaryEmailAddress?.emailAddress ?? '—'
 
     const { displayCurrency, loading: prefsLoading, setDisplayCurrency } = usePreferences()
     const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false)
+    const [editProfileOpen, setEditProfileOpen] = useState(false)
+    const [deleteOpen, setDeleteOpen] = useState(false)
+    const [deleting, setDeleting] = useState(false)
+    const [deleteError, setDeleteError] = useState<string | null>(null)
 
     const currencySubtitle = prefsLoading
         ? 'Loading…'
         : `${displayCurrency} · ${getCurrencyOption(displayCurrency).label}`
+
+    const handleDeleteAccount = async () => {
+        if (deleting) return
+        setDeleting(true)
+        setDeleteError(null)
+        try {
+            await deleteAccount({ supabase, user, userId })
+            try {
+                await signOut()
+            } catch {
+                // user is already gone server-side; ignore stale session errors
+            }
+            setDeleteOpen(false)
+            router.replace('/(auth)/sign-in')
+        } catch (e) {
+            const msg = isClerkAPIResponseError(e)
+                ? e.errors?.[0]?.longMessage ?? e.errors?.[0]?.message
+                : e instanceof Error
+                  ? e.message
+                  : 'Could not delete your account.'
+            setDeleteError(msg ?? 'Could not delete your account.')
+        } finally {
+            setDeleting(false)
+        }
+    }
 
     const confirmSignOut = () => {
         Alert.alert(
@@ -143,7 +178,12 @@ export default function ProfileScreen() {
                         Account
                     </Text>
                     <SectionCard>
-                        <SettingsRow icon='user' title='Edit profile' subtitle='Name, email, photo' />
+                        <SettingsRow
+                            icon='user'
+                            title='Edit profile'
+                            subtitle='Name and photo'
+                            onPress={() => setEditProfileOpen(true)}
+                        />
                         <SettingsRow icon='bell' title='Reminders' subtitle='Renewal alerts' />
                     </SectionCard>
                 </View>
@@ -181,6 +221,25 @@ export default function ProfileScreen() {
                     <SettingsRow icon='log-out' title='Sign out' onPress={confirmSignOut} danger />
                 </SectionCard>
 
+                {/* Danger zone */}
+                <View className='gap-3'>
+                    <Text className='px-1 font-inter text-xs uppercase tracking-wider text-red-400/80'>
+                        Danger zone
+                    </Text>
+                    <SectionCard>
+                        <SettingsRow
+                            icon='trash-2'
+                            title='Delete account'
+                            subtitle='Permanently erase your data'
+                            onPress={() => {
+                                setDeleteError(null)
+                                setDeleteOpen(true)
+                            }}
+                            danger
+                        />
+                    </SectionCard>
+                </View>
+
                 <Text className='text-center font-inter text-xs text-neutral-600'>Subora · v1.0.0</Text>
             </Animated.ScrollView>
 
@@ -195,6 +254,20 @@ export default function ProfileScreen() {
                         Alert.alert('Could not save', 'Try again in a moment.')
                     })
                 }}
+            />
+
+            <EditProfileModal visible={editProfileOpen} onClose={() => setEditProfileOpen(false)} />
+
+            <DeleteAccountModal
+                visible={deleteOpen}
+                email={user?.primaryEmailAddress?.emailAddress ?? undefined}
+                deleting={deleting}
+                error={deleteError}
+                onClose={() => {
+                    if (deleting) return
+                    setDeleteOpen(false)
+                }}
+                onConfirm={() => void handleDeleteAccount()}
             />
         </View>
     )
