@@ -53,23 +53,29 @@ export function SubscriptionRow({
             </View>
 
             {variant === 'list' ? (
-                <View className='items-end gap-2'>
-                    <Text className='font-inter-bold text-lg text-white'>
-                        {formatCurrency(subscription.price, subscription.currency)}
-                        <Text className='font-inter text-xs text-neutral-500'>  {cycleSuffix}</Text>
-                    </Text>
-                    {onToggleActive ? (
-                        <Switch
-                            value={subscription.active}
-                            onValueChange={onToggleActive}
-                            trackColor={{ true: '#A3E635', false: '#27272A' }}
-                            thumbColor='#FFFFFF'
-                            ios_backgroundColor='#27272A'
-                        />
-                    ) : (
-                        <Feather name='chevron-right' size={18} color='#52525B' />
-                    )}
-                </View>
+                <>
+                    <View className='items-end'>
+                        <Text className='font-inter-bold text-base text-white'>
+                            {formatCurrency(subscription.price, subscription.currency)}
+                        </Text>
+                        <Text className='mt-0.5 font-inter text-xs text-neutral-500'>
+                            {cycleSuffix}
+                        </Text>
+                    </View>
+                    <View className='ml-3 items-end justify-center'>
+                        {onToggleActive ? (
+                            <Switch
+                                value={subscription.active}
+                                onValueChange={onToggleActive}
+                                trackColor={{ true: '#A3E635', false: '#27272A' }}
+                                thumbColor='#FFFFFF'
+                                ios_backgroundColor='#27272A'
+                            />
+                        ) : (
+                            <Feather name='chevron-right' size={18} color='#52525B' />
+                        )}
+                    </View>
+                </>
             ) : (
                 <View className='items-end'>
                     <Text className='font-inter-bold text-base text-white'>

@@ -1,0 +1,60 @@
+---
+description: Hard cap of 300 lines per source file; one responsibility per file
+alwaysApply: true
+---
+
+# Modular files (300-LOC cap)
+
+## Rule
+
+- Every `.ts`, `.tsx`, and `.css` file in this repo MUST stay under **300 lines**, counting code, JSX, and comments.
+- If a change pushes a file past the cap, split it before merging.
+- One responsibility per file. A component, hook, server action, route handler, or stylesheet section is a responsibility.
+
+## How to split
+
+- **React components** → extract sub-components into `src/components/<feature>/<Piece>.tsx` and compose them.
+- **Big hooks / containers** → split state machines into `src/features/<feature>/<useFoo>.ts` + helpers (`buildPatch.ts`, `sendVerification.ts`, etc.). Keep the orchestrator thin.
+- **Constants / static data** → move to `src/constants/<topic>.ts` and import.
+- **Stylesheets** → split `app/globals.css` siblings into `app/styles/<concern>.css` (`landing.css`, `animations.css`, `analyzer-form.css`, …) and import from `globals.css`.
+
+## Co-location
+
+- Co-locate hooks/types with a component only when they are **under 30 lines** and used **only by that component**. Otherwise, move them out.
+- Cross-feature shared UI lives in `src/components/ui/`. Cross-feature shared logic lives in `src/lib/`.
+
+## Folder layout
+
+```
+app/                # routes, layouts, route handlers, server actions live next to routes when route-specific
+src/
+  components/<feature>/   # presentational pieces, one per file
+  features/<feature>/     # orchestrators, hooks, server actions
+  lib/                    # cross-feature utilities (calc, vision, supabase clients, …)
+  constants/              # static data
+  hooks/                  # cross-feature hooks
+  types/                  # shared types
+```
+
+## Example: too big
+
+```typescript
+// src/features/profile/Profile.tsx — 517 lines ❌
+```
+
+Split into:
+
+```typescript
+// src/features/profile/Profile.tsx                 — orchestrator (<150 LOC)
+// src/components/profile/ProfileNav.tsx            — nav + footer
+// src/components/profile/AccountSection.tsx        — account form
+// src/components/profile/BillingSection.tsx        — plan + usage
+// src/components/profile/UsageSection.tsx          — analyses + activity
+// src/components/profile/ProfilePrimitives.tsx     — Field, SectionCard, UsageStat
+// src/constants/profile-plans.ts                   — PLAN_LABEL, PLAN_DESCRIPTION
+```
+
+## Imports
+
+- Use the `@/*` alias (mapped to `./src/*`) for cross-folder imports inside `src/`.
+- Pages in `app/` import features via `@/features/<feature>/<Feature>`. Avoid deep `../../../` chains.

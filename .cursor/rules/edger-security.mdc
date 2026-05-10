@@ -1,0 +1,15 @@
+---
+description: Apply vibe-security for secrets, Clerk, Supabase RLS, API auth and webhooks.
+globs: "**/*.{ts,tsx,mts,cts}"
+alwaysApply: false
+---
+
+# Security — vibe-security skill
+
+Before shipping or refactoring anything that touches **authentication (Clerk)**, **Supabase**, **secrets / env**, **API routes**, **payments**, **webhooks**, **AI/API keys**, or **user-controlled input**, load the project skill:
+
+- [.cursor/skills/vibe-security/SKILL.md](../skills/vibe-security/SKILL.md)
+
+Follow its audit checklist and pull in the referenced files under `.cursor/skills/vibe-security/references/` only for technologies in use.
+
+**Baseline:** Never trust the client; enforce authorization and secrets only on trusted servers; enable and scope Supabase RLS with `WITH CHECK`; never expose `service_role` in browser bundles (`VITE_`, etc.).

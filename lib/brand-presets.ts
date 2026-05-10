@@ -1,8 +1,8 @@
 export type BrandPreset = {
     name: string
     domain: string
-    /** simpleicons.org slug — see https://simpleicons.org for the full list. */
-    iconSlug: string
+    /** simpleicons.org slug — omit when the brand has no Simple Icons asset; favicon is used instead. */
+    iconSlug?: string
     brandColor: string
     aliases?: string[]
 }
@@ -23,7 +23,7 @@ export const BRAND_PRESETS: BrandPreset[] = [
     { name: 'Disney+', domain: 'disneyplus.com', iconSlug: 'disneyplus', brandColor: '#0E47BA', aliases: ['disney plus', 'disney'] },
     { name: 'HBO Max', domain: 'max.com', iconSlug: 'max', brandColor: '#002BE7', aliases: ['max', 'hbo'] },
     { name: 'YouTube Premium', domain: 'youtube.com', iconSlug: 'youtube', brandColor: '#FF0000', aliases: ['youtube'] },
-    { name: 'Amazon Prime', domain: 'amazon.com', iconSlug: 'amazonprime', brandColor: '#00A8E1', aliases: ['prime', 'amazon'] },
+    { name: 'Prime Video', domain: 'primevideo.com', brandColor: '#00A8E1', aliases: ['prime', 'amazon', 'prime video'] },
     { name: 'Hulu', domain: 'hulu.com', iconSlug: 'hulu', brandColor: '#1CE783' },
     { name: 'Paramount+', domain: 'paramountplus.com', iconSlug: 'paramountplus', brandColor: '#0064FF', aliases: ['paramount'] },
     { name: 'Peacock', domain: 'peacocktv.com', iconSlug: 'peacock', brandColor: '#000000' },

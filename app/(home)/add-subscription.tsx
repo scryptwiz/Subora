@@ -1,7 +1,18 @@
+import { BrandPreviewCard } from '@/components/add-subscription/brand-preview-card'
+import { DatePickerRow } from '@/components/add-subscription/date-picker-row'
+import { DetailRow, FieldLabel, RowDivider } from '@/components/add-subscription/form-fields'
+import { PresetChips } from '@/components/add-subscription/preset-chips'
+import { PriceAndCycleFields } from '@/components/add-subscription/price-and-cycle-fields'
+import { DEFAULT_CURRENCY } from '@/constants/currencies'
+import { usePreferences } from '@/contexts/preferences-context'
+import { useSubscriptions } from '@/contexts/subscriptions-context'
+import { dateToBillingIso, formatBillingDate } from '@/lib/billing-date'
 import { Feather } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useMemo, useRef, useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
+    ActivityIndicator,
+    Alert,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -11,7 +22,6 @@ import {
     View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { SubscriptionLogo } from '../../components/subscriptions/subscription-logo'
 import { type BrandPreset } from '../../lib/brand-presets'
 import { deriveDomain } from '../../lib/logo'
 import {
@@ -20,27 +30,64 @@ import {
     type BillingCycle,
 } from '../../lib/subscriptions'
 
-type Cycle = BillingCycle
-const CYCLES: { id: Cycle; label: string }[] = [
-    { id: 'week', label: 'Week' },
-    { id: 'month', label: 'Month' },
-    { id: 'year', label: 'Year' },
-]
-
 export default function AddSubscriptionScreen() {
     const insets = useSafeAreaInsets()
     const router = useRouter()
+    const params = useLocalSearchParams<{ id?: string }>()
+    const editingId = typeof params.id === 'string' && params.id.length > 0 ? params.id : undefined
+    const { subscriptions, insertSubscription, updateSubscription, configured } = useSubscriptions()
+    const editingSubscription = useMemo(
+        () => (editingId ? subscriptions.find(s => s.id === editingId) : undefined),
+        [editingId, subscriptions]
+    )
+    const isEditing = Boolean(editingId)
+    const { displayCurrency, loading: prefsLoading } = usePreferences()
+    const seededCurrency = useRef(false)
+    const hydratedFromExistingRef = useRef(false)
 
     const [name, setName] = useState('')
     const [domainInput, setDomainInput] = useState('')
     const [iconSlug, setIconSlug] = useState<string | undefined>(undefined)
     const [brandColor, setBrandColor] = useState<string | undefined>(undefined)
     const [price, setPrice] = useState('')
-    const [cycle, setCycle] = useState<Cycle>('month')
-    const [firstPayment, setFirstPayment] = useState('Today')
+    const [cycle, setCycle] = useState<BillingCycle>('month')
+    const [currency, setCurrency] = useState(DEFAULT_CURRENCY)
+    const [renewalDate, setRenewalDate] = useState<Date>(() => new Date())
+    const [active, setActive] = useState(true)
+
+    const minRenewalDate = useMemo(() => {
+        const d = new Date()
+        d.setHours(0, 0, 0, 0)
+        return d
+    }, [])
     const [reminders, setReminders] = useState(true)
+    const [saving, setSaving] = useState(false)
 
     const priceRef = useRef<TextInput>(null)
+
+    useEffect(() => {
+        if (isEditing) return
+        if (prefsLoading || seededCurrency.current) return
+        setCurrency(displayCurrency)
+        seededCurrency.current = true
+    }, [prefsLoading, displayCurrency, isEditing])
+
+    useEffect(() => {
+        if (!isEditing || hydratedFromExistingRef.current) return
+        if (!editingSubscription) return
+
+        setName(editingSubscription.name)
+        setDomainInput(editingSubscription.domain ?? '')
+        setIconSlug(editingSubscription.iconSlug)
+        setBrandColor(editingSubscription.brandColor)
+        setPrice(String(editingSubscription.price))
+        setCycle(editingSubscription.billingCycle)
+        setCurrency(editingSubscription.currency.toUpperCase() || DEFAULT_CURRENCY)
+        const next = new Date(editingSubscription.nextRenewal)
+        if (!Number.isNaN(next.getTime())) setRenewalDate(next)
+        setActive(editingSubscription.active)
+        hydratedFromExistingRef.current = true
+    }, [isEditing, editingSubscription])
 
     const suggestions = useMemo(() => searchPresets(name, 5), [name])
 
@@ -67,10 +114,53 @@ export default function AddSubscriptionScreen() {
         setName(next)
     }
 
-    const handleSave = () => {
-        if (!isValid) return
-        // Demo: just close. Wire to persistence later.
-        router.back()
+    const handleSave = async () => {
+        if (!isValid || saving) return
+        if (!configured) {
+            Alert.alert(
+                'Supabase not configured',
+                'Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to your environment.'
+            )
+            return
+        }
+
+        const domain = effectiveDomain?.trim() || undefined
+
+        setSaving(true)
+        try {
+            if (isEditing && editingId) {
+                await updateSubscription(editingId, {
+                    name: name.trim(),
+                    domain: domain ?? '',
+                    iconSlug: iconSlug ?? undefined,
+                    brandColor: brandColor ?? undefined,
+                    price: priceNumber,
+                    currency: currency.toUpperCase(),
+                    billingCycle: cycle,
+                    nextRenewal: dateToBillingIso(renewalDate),
+                    active,
+                })
+            } else {
+                await insertSubscription({
+                    name: name.trim(),
+                    domain,
+                    plan: undefined,
+                    iconSlug,
+                    brandColor,
+                    price: priceNumber,
+                    currency: currency.toUpperCase(),
+                    billingCycle: cycle,
+                    nextRenewal: dateToBillingIso(renewalDate),
+                    active: true,
+                })
+            }
+            router.back()
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Could not save subscription.'
+            Alert.alert('Save failed', message)
+        } finally {
+            setSaving(false)
+        }
     }
 
     return (
@@ -89,7 +179,6 @@ export default function AddSubscriptionScreen() {
                 keyboardShouldPersistTaps='handled'
                 showsVerticalScrollIndicator={false}
             >
-                {/* Modal header */}
                 <View className='flex-row items-center justify-between'>
                     <Pressable
                         onPress={() => router.back()}
@@ -99,40 +188,33 @@ export default function AddSubscriptionScreen() {
                     >
                         <Feather name='x' size={18} color='#FFFFFF' />
                     </Pressable>
-                    <Text className='font-inter-medium text-base text-white'>New subscription</Text>
+                    <Text className='font-inter-medium text-base text-white'>
+                        {isEditing ? 'Edit subscription' : 'New subscription'}
+                    </Text>
                     <Pressable
-                        onPress={handleSave}
-                        disabled={!isValid}
+                        onPress={() => void handleSave()}
+                        disabled={!isValid || saving}
                         hitSlop={8}
                     >
-                        <Text
-                            className={`font-inter-medium text-sm ${isValid ? 'text-white' : 'text-neutral-600'}`}
-                        >
-                            Save
-                        </Text>
+                        {saving ? (
+                            <ActivityIndicator color='#FFFFFF' size='small' />
+                        ) : (
+                            <Text
+                                className={`font-inter-medium text-sm ${isValid ? 'text-white' : 'text-neutral-600'}`}
+                            >
+                                Save
+                            </Text>
+                        )}
                     </Pressable>
                 </View>
 
-                {/* Brand preview */}
-                <View className='items-center gap-4 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6'>
-                    <SubscriptionLogo
-                        name={name || 'New service'}
-                        domain={effectiveDomain}
-                        iconSlug={iconSlug}
-                        tint={brandColor}
-                        size={84}
-                    />
-                    <View className='items-center'>
-                        <Text className='font-inter-bold text-xl text-white'>
-                            {name.trim() || 'Service name'}
-                        </Text>
-                        <Text className='mt-1 font-inter text-xs text-neutral-500'>
-                            {effectiveDomain ?? 'No website'}
-                        </Text>
-                    </View>
-                </View>
+                <BrandPreviewCard
+                    name={name}
+                    effectiveDomain={effectiveDomain}
+                    iconSlug={iconSlug}
+                    brandColor={brandColor}
+                />
 
-                {/* Service input */}
                 <View className='gap-3'>
                     <FieldLabel icon='tag' label='Service' />
                     <TextInput
@@ -147,39 +229,15 @@ export default function AddSubscriptionScreen() {
                         onSubmitEditing={() => priceRef.current?.focus()}
                     />
 
-                    {suggestions.length > 0 && !iconSlug ? (
-                        <View className='gap-2'>
-                            <Text className='font-inter text-xs uppercase tracking-wider text-neutral-500'>
-                                Suggestions
-                            </Text>
-                            <View className='flex-row flex-wrap gap-2'>
-                                {suggestions.map(preset => (
-                                    <Pressable
-                                        key={preset.domain}
-                                        onPress={() => applyPreset(preset)}
-                                        className='flex-row items-center gap-2 rounded-full border border-[#27272A] bg-[#16161A] py-1.5 pl-1.5 pr-3'
-                                        style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-                                    >
-                                        <SubscriptionLogo
-                                            name={preset.name}
-                                            domain={preset.domain}
-                                            iconSlug={preset.iconSlug}
-                                            tint={preset.brandColor}
-                                            size={26}
-                                        />
-                                        <Text className='font-inter-medium text-sm text-white'>
-                                            {preset.name}
-                                        </Text>
-                                    </Pressable>
-                                ))}
-                            </View>
-                        </View>
-                    ) : null}
+                    <PresetChips
+                        suggestions={suggestions}
+                        onSelect={applyPreset}
+                        show={!iconSlug}
+                    />
                 </View>
 
-                {/* Domain (advanced) */}
                 <View className='gap-3'>
-                    <FieldLabel icon='globe' label='Website (used for the logo)' />
+                    <FieldLabel icon='globe' label='Website (optional, used for the logo)' />
                     <TextInput
                         value={domainInput}
                         onChangeText={setDomainInput}
@@ -192,69 +250,28 @@ export default function AddSubscriptionScreen() {
                     />
                 </View>
 
-                {/* Price (manual entry only — never auto-populated) */}
-                <View className='gap-3'>
-                    <FieldLabel icon='dollar-sign' label='Price' />
-                    <View className='flex-row items-center gap-3'>
-                        <View className='h-14 w-14 items-center justify-center rounded-2xl border border-[#27272A] bg-[#16161A]'>
-                            <Text className='font-inter-medium text-lg text-neutral-400'>$</Text>
-                        </View>
-                        <TextInput
-                            ref={priceRef}
-                            value={price}
-                            onChangeText={setPrice}
-                            placeholder='0.00'
-                            placeholderTextColor='#52525B'
-                            keyboardType='decimal-pad'
-                            className='h-14 flex-1 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter-bold text-2xl text-white'
-                        />
-                    </View>
+                <PriceAndCycleFields
+                    ref={priceRef}
+                    price={price}
+                    onPriceChange={setPrice}
+                    cycle={cycle}
+                    onCycleChange={setCycle}
+                    currency={currency}
+                    onCurrencyChange={setCurrency}
+                />
 
-                    <View className='flex-row gap-2'>
-                        {CYCLES.map(c => {
-                            const active = c.id === cycle
-                            return (
-                                <Pressable
-                                    key={c.id}
-                                    onPress={() => setCycle(c.id)}
-                                    className={`flex-1 items-center rounded-2xl border py-3 ${active ? 'border-white bg-white' : 'border-[#27272A] bg-[#16161A]'
-                                        }`}
-                                    style={({ pressed }) =>
-                                        pressed && !active ? { opacity: 0.85 } : undefined
-                                    }
-                                >
-                                    <Text
-                                        className={`font-inter-medium text-sm ${active ? 'text-[#111111]' : 'text-neutral-300'
-                                            }`}
-                                    >
-                                        {c.label}
-                                    </Text>
-                                </Pressable>
-                            )
-                        })}
-                    </View>
-                </View>
-
-                {/* Billing details */}
                 <View className='gap-3'>
                     <FieldLabel icon='calendar' label='Billing' />
                     <View className='overflow-hidden rounded-2xl border border-[#1F1F22] bg-[#16161A]'>
-                        <DetailRow
+                        <DatePickerRow
                             icon='calendar'
-                            title='First payment'
-                            value={firstPayment}
-                            onPress={() =>
-                                setFirstPayment(prev => (prev === 'Today' ? 'Tomorrow' : 'Today'))
-                            }
+                            title='Renewal date'
+                            value={renewalDate}
+                            onChange={setRenewalDate}
+                            formatValue={formatBillingDate}
+                            minimumDate={minRenewalDate}
                         />
-                        <Divider />
-                        <DetailRow
-                            icon='credit-card'
-                            title='Payment method'
-                            value='Apple Pay'
-                            onPress={() => undefined}
-                        />
-                        <Divider />
+                        <RowDivider />
                         <DetailRow
                             icon='bell'
                             title='Renewal reminder'
@@ -264,74 +281,33 @@ export default function AddSubscriptionScreen() {
                     </View>
                 </View>
 
-                {/* Save button */}
                 <Pressable
-                    onPress={handleSave}
-                    disabled={!isValid}
-                    className={`h-16 items-center justify-center rounded-2xl ${isValid ? 'bg-white' : 'bg-white/20'
+                    onPress={() => void handleSave()}
+                    disabled={!isValid || saving}
+                    className={`h-16 items-center justify-center rounded-2xl ${isValid && !saving ? 'bg-white' : 'bg-white/20'
                         }`}
                     style={({ pressed }) =>
-                        pressed && isValid ? { opacity: 0.85 } : undefined
+                        pressed && isValid && !saving ? { opacity: 0.85 } : undefined
                     }
                 >
-                    <Text
-                        className={`font-inter-medium text-lg ${isValid ? 'text-[#111111]' : 'text-neutral-500'
-                            }`}
-                    >
-                        {isValid
-                            ? `Add ${formatCurrency(priceNumber)} / ${cycle}`
-                            : 'Add subscription'}
-                    </Text>
+                    {saving ? (
+                        <ActivityIndicator color='#111111' />
+                    ) : (
+                        <Text
+                            className={`font-inter-medium text-lg ${isValid ? 'text-[#111111]' : 'text-neutral-500'
+                                }`}
+                        >
+                            {isValid
+                                ? isEditing
+                                    ? `Save · ${formatCurrency(priceNumber, currency)} / ${cycle}`
+                                    : `Add ${formatCurrency(priceNumber, currency)} / ${cycle}`
+                                : isEditing
+                                    ? 'Save changes'
+                                    : 'Add subscription'}
+                        </Text>
+                    )}
                 </Pressable>
             </ScrollView>
         </KeyboardAvoidingView>
     )
-}
-
-function FieldLabel({
-    icon,
-    label,
-}: {
-    icon: React.ComponentProps<typeof Feather>['name']
-    label: string
-}) {
-    return (
-        <View className='flex-row items-center gap-2'>
-            <Feather name={icon} size={14} color='#71717A' />
-            <Text className='font-inter text-xs uppercase tracking-wider text-neutral-500'>
-                {label}
-            </Text>
-        </View>
-    )
-}
-
-function DetailRow({
-    icon,
-    title,
-    value,
-    onPress,
-}: {
-    icon: React.ComponentProps<typeof Feather>['name']
-    title: string
-    value: string
-    onPress: () => void
-}) {
-    return (
-        <Pressable
-            onPress={onPress}
-            className='flex-row items-center gap-3 px-4 py-4'
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-        >
-            <View className='h-9 w-9 items-center justify-center rounded-xl bg-[#1F1F22]'>
-                <Feather name={icon} size={16} color='#FFFFFF' />
-            </View>
-            <Text className='flex-1 font-inter-medium text-base text-white'>{title}</Text>
-            <Text className='font-inter text-sm text-neutral-400'>{value}</Text>
-            <Feather name='chevron-right' size={16} color='#52525B' />
-        </Pressable>
-    )
-}
-
-function Divider() {
-    return <View className='ml-[64px] h-px bg-[#1F1F22]' />
 }

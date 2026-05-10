@@ -6,8 +6,8 @@ export type Subscription = {
     id: string
     name: string
     plan?: string
-    /** Domain of the service, used as a stable identifier and for logo fallback (e.g. "netflix.com"). */
-    domain: string
+    /** Optional domain (e.g. "netflix.com") used for the favicon-based logo fallback. */
+    domain?: string
     /** Optional simpleicons slug for crisp brand icon rendering. */
     iconSlug?: string
     /** Brand colour used for the logo background tile when no logo is available. */
@@ -20,6 +20,8 @@ export type Subscription = {
     /** Whether the user wants this subscription tracked / "active". */
     active: boolean
     paymentMethod?: string
+    /** ISO timestamp of when this subscription was added to the tracker. */
+    createdAt?: string
 }
 
 const TODAY = new Date('2026-05-08T00:00:00Z')
@@ -180,12 +182,40 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
     JPY: '¥',
     CAD: 'CA$',
     AUD: 'A$',
+    CHF: 'CHF',
+    SEK: 'kr',
+    NOK: 'kr',
+    DKK: 'kr',
+    NGN: '₦',
 }
 
 export function formatCurrency(amount: number, currency = 'USD'): string {
-    const symbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `
-    const fixed = Number.isInteger(amount) ? amount.toFixed(2) : amount.toFixed(2)
-    return `${symbol}${fixed}`
+    const code = currency.toUpperCase()
+    const customSymbol = CURRENCY_SYMBOLS[code]
+
+    if (customSymbol) {
+        try {
+            const minimumFractionDigits = code === 'JPY' ? 0 : 2
+            const maximumFractionDigits = minimumFractionDigits
+            const number = new Intl.NumberFormat('en-US', {
+                minimumFractionDigits,
+                maximumFractionDigits,
+            }).format(amount)
+            return `${customSymbol}${number}`
+        } catch {
+            return `${customSymbol}${amount.toFixed(code === 'JPY' ? 0 : 2)}`
+        }
+    }
+
+    try {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: code,
+            currencyDisplay: 'narrowSymbol',
+        }).format(amount)
+    } catch {
+        return `${code} ${amount.toFixed(2)}`
+    }
 }
 
 /** Convert any subscription to a per-month cost for aggregation. */

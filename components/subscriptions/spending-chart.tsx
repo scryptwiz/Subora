@@ -23,11 +23,11 @@ export function SpendingChart({ bars, height = 120 }: Props) {
     return (
         <View>
             <View className='flex-row items-end justify-between gap-2' style={{ height }}>
-                {bars.map(bar => {
+                {bars.map((bar, idx) => {
                     const ratio = bar.value / max
                     const barHeight = Math.max(ratio * height, 8)
                     return (
-                        <View key={bar.label} className='flex-1 items-center'>
+                        <View key={`bar-${idx}`} className='flex-1 items-center'>
                             <View
                                 className={`w-full rounded-md ${bar.active
                                     ? 'border border-lime-400/60 bg-lime-400/20'
@@ -40,8 +40,8 @@ export function SpendingChart({ bars, height = 120 }: Props) {
                 })}
             </View>
             <View className='mt-3 flex-row justify-between'>
-                {bars.map(bar => (
-                    <View key={`${bar.label}-label`} className='flex-1 items-center'>
+                {bars.map((bar, idx) => (
+                    <View key={`label-${idx}`} className='flex-1 items-center'>
                         <Text
                             className={`text-xs font-inter ${bar.active ? 'text-white' : 'text-neutral-500'
                                 }`}
