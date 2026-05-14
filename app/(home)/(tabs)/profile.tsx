@@ -1,6 +1,8 @@
 import { CurrencyPickerModal } from '@/components/profile/currency-picker-modal'
 import { DeleteAccountModal } from '@/components/profile/delete-account-modal'
 import { EditProfileModal } from '@/components/profile/edit-profile-modal'
+import { ExportDataModal } from '@/components/profile/export-data-modal'
+import { PushNotificationPromptSection } from '@/components/profile/push-notification-prompt-section'
 import { getCurrencyOption } from '@/constants/currencies'
 import { usePreferences } from '@/contexts/preferences-context'
 import { useSupabase } from '@/hooks/use-supabase'
@@ -14,6 +16,7 @@ import { Alert, Animated, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScrollRevealTopChrome } from '../../../components/scroll-reveal-top-chrome'
 import { avatarColor, initials } from '../../../lib/logo'
+import { profileDisplayName } from '../../../lib/profile-display-name'
 
 type RowProps = {
     icon: React.ComponentProps<typeof Feather>['name']
@@ -76,12 +79,13 @@ export default function ProfileScreen() {
         useNativeDriver: false,
     })
 
-    const displayName = user?.fullName ?? user?.firstName ?? user?.username ?? 'User name'
+    const displayName = profileDisplayName(user)
     const email = user?.primaryEmailAddress?.emailAddress ?? '—'
 
     const { displayCurrency, loading: prefsLoading, setDisplayCurrency } = usePreferences()
     const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false)
     const [editProfileOpen, setEditProfileOpen] = useState(false)
+    const [exportDataOpen, setExportDataOpen] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
     const [deleting, setDeleting] = useState(false)
     const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -152,9 +156,11 @@ export default function ProfileScreen() {
                 <View className='items-center gap-3 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6'>
                     {user?.imageUrl ? (
                         <Image
+                            key={user.imageUrl}
                             source={{ uri: user.imageUrl }}
                             style={{ width: 88, height: 88, borderRadius: 44 }}
                             contentFit='cover'
+                            recyclingKey={user.imageUrl}
                         />
                     ) : (
                         <View
@@ -172,6 +178,8 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
+                <PushNotificationPromptSection />
+
                 {/* Account section */}
                 <View className='gap-3'>
                     <Text className='px-1 font-inter text-xs uppercase tracking-wider text-neutral-500'>
@@ -181,10 +189,15 @@ export default function ProfileScreen() {
                         <SettingsRow
                             icon='user'
                             title='Edit profile'
-                            subtitle='Name and photo'
+                            subtitle='Username, name, and photo'
                             onPress={() => setEditProfileOpen(true)}
                         />
-                        <SettingsRow icon='bell' title='Reminders' subtitle='Renewal alerts' />
+                        <SettingsRow
+                            icon='bell'
+                            title='Reminders'
+                            subtitle='Renewal alerts'
+                            onPress={() => router.push('/(home)/notifications')}
+                        />
                     </SectionCard>
                 </View>
 
@@ -200,7 +213,12 @@ export default function ProfileScreen() {
                             subtitle={currencySubtitle}
                             onPress={() => setCurrencyPickerOpen(true)}
                         />
-                        <SettingsRow icon='download' title='Export data' />
+                        <SettingsRow
+                            icon='download'
+                            title='Export data'
+                            subtitle='CSV for spreadsheets'
+                            onPress={() => setExportDataOpen(true)}
+                        />
                     </SectionCard>
                 </View>
 
@@ -257,6 +275,8 @@ export default function ProfileScreen() {
             />
 
             <EditProfileModal visible={editProfileOpen} onClose={() => setEditProfileOpen(false)} />
+
+            <ExportDataModal visible={exportDataOpen} onClose={() => setExportDataOpen(false)} />
 
             <DeleteAccountModal
                 visible={deleteOpen}

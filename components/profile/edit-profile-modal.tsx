@@ -1,9 +1,14 @@
 import { avatarColor, initials } from '@/lib/logo'
+import {
+    mergePreferredUsernameIntoUnsafeMetadata,
+    preferredUsernameFromUnsafeMetadata,
+    profileDisplayName,
+} from '@/lib/profile-display-name'
 import { isClerkAPIResponseError, useUser } from '@clerk/expo'
 import { Feather } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     ActivityIndicator,
     Alert,
@@ -32,20 +37,29 @@ type Props = {
 export function EditProfileModal({ visible, onClose }: Props) {
     const insets = useSafeAreaInsets()
     const { user, isLoaded } = useUser()
+    const [username, setUsername] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [pickedUri, setPickedUri] = useState<string | null>(null)
     const [saving, setSaving] = useState(false)
+    /** When this matches `user.id` while the sheet is open, we already hydrated the form — do not reset (Clerk replaces `user` often and would wipe `pickedUri`). */
+    const hydratedUserId = useRef<string | null>(null)
 
     useEffect(() => {
-        if (!visible || !user) return
+        if (!visible) {
+            hydratedUserId.current = null
+            return
+        }
+        if (!user) return
+        if (hydratedUserId.current === user.id) return
+        hydratedUserId.current = user.id
+        setUsername(
+            preferredUsernameFromUnsafeMetadata(user.unsafeMetadata) || user.username || ''
+        )
         setFirstName(user.firstName ?? '')
         setLastName(user.lastName ?? '')
         setPickedUri(null)
     }, [visible, user])
-
-    const displayName =
-        user?.fullName ?? user?.firstName ?? user?.username ?? 'User name'
 
     const pickImage = async () => {
         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -55,7 +69,7 @@ export function EditProfileModal({ visible, onClose }: Props) {
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.85,
@@ -67,11 +81,20 @@ export function EditProfileModal({ visible, onClose }: Props) {
 
     const handleSave = async () => {
         if (!user || saving) return
+        const usernameTrimmed = username.trim()
+        if (!usernameTrimmed) {
+            Alert.alert('Username required', 'Add a username before saving.')
+            return
+        }
         setSaving(true)
         try {
             await user.update({
                 firstName: firstName.trim() || undefined,
                 lastName: lastName.trim() || undefined,
+                unsafeMetadata: mergePreferredUsernameIntoUnsafeMetadata(
+                    user.unsafeMetadata,
+                    usernameTrimmed
+                ),
             })
 
             if (pickedUri) {
@@ -98,6 +121,7 @@ export function EditProfileModal({ visible, onClose }: Props) {
                 }
             }
 
+            await user.reload()
             onClose()
         } catch (e) {
             const msg = isClerkAPIResponseError(e)
@@ -112,6 +136,12 @@ export function EditProfileModal({ visible, onClose }: Props) {
     }
 
     if (!isLoaded || !user) return null
+
+    const displayName = profileDisplayName({
+        unsafeMetadata: mergePreferredUsernameIntoUnsafeMetadata(user.unsafeMetadata, username),
+        username: user.username,
+        firstName,
+    })
 
     const previewUri = pickedUri ?? user.imageUrl ?? null
 
@@ -156,6 +186,7 @@ export function EditProfileModal({ visible, onClose }: Props) {
                         <Pressable onPress={() => void pickImage()} accessibilityLabel='Change profile photo'>
                             {previewUri ? (
                                 <Image
+                                    key={previewUri}
                                     source={{ uri: previewUri }}
                                     style={{ width: 112, height: 112, borderRadius: 56 }}
                                     contentFit='cover'
@@ -178,8 +209,24 @@ export function EditProfileModal({ visible, onClose }: Props) {
                             </View>
                         </Pressable>
                         <Text className='text-center font-inter text-xs text-neutral-600'>
-                            Name and photo only. Email is managed by your sign-in provider.
+                            Username, name, and photo. Email is managed by your sign-in provider.
                         </Text>
+                    </View>
+
+                    <View className='gap-2'>
+                        <Text className='px-1 font-inter text-xs uppercase tracking-wider text-neutral-500'>
+                            Username
+                        </Text>
+                        <TextInput
+                            value={username}
+                            onChangeText={setUsername}
+                            placeholder='Username'
+                            placeholderTextColor='#52525B'
+                            autoCapitalize='none'
+                            autoCorrect={false}
+                            autoComplete='username'
+                            className='h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base text-white'
+                        />
                     </View>
 
                     <View className='gap-2'>

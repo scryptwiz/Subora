@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, useSupabase } from '@/hooks/use-supabase'
+import { useSyncLocalRenewalNotifications } from '@/hooks/use-sync-local-renewal-notifications'
 import { rowToSubscription, type SubscriptionRow } from '@/lib/subscription-db'
 import type { BillingCycle, Subscription } from '@/lib/subscriptions'
 import { useAuth } from '@clerk/expo'
@@ -26,7 +27,6 @@ export type InsertSubscriptionInput = {
     active?: boolean
     paymentMethod?: string
 }
-
 export type UpdateSubscriptionInput = Partial<InsertSubscriptionInput>
 
 type SubscriptionsContextValue = {
@@ -35,14 +35,13 @@ type SubscriptionsContextValue = {
     error: string | null
     configured: boolean
     refetch: () => Promise<void>
-    insertSubscription: (input: InsertSubscriptionInput) => Promise<void>
+    insertSubscription: (input: InsertSubscriptionInput) => Promise<string>
     updateSubscription: (id: string, input: UpdateSubscriptionInput) => Promise<void>
     setSubscriptionActive: (id: string, active: boolean) => Promise<void>
     deleteSubscription: (id: string) => Promise<void>
 }
 
 const SubscriptionsContext = createContext<SubscriptionsContextValue | null>(null)
-
 export function SubscriptionsProvider({ children }: { children: ReactNode }) {
     const supabase = useSupabase()
     const { userId, isLoaded } = useAuth()
@@ -92,6 +91,8 @@ export function SubscriptionsProvider({ children }: { children: ReactNode }) {
         if (!isLoaded) return
         void fetchSubscriptions()
     }, [isLoaded, fetchSubscriptions])
+
+    useSyncLocalRenewalNotifications(configured, subscriptions)
 
     const applyLocalPatch = useCallback(
         (id: string, patch: UpdateSubscriptionInput) => {
@@ -161,10 +162,14 @@ export function SubscriptionsProvider({ children }: { children: ReactNode }) {
                 payment_method: input.paymentMethod ?? null,
             }
 
-            const { error: insertError } = await supabase.from('subscriptions').insert(payload)
-
+            const { data, error: insertError } = await supabase
+                .from('subscriptions')
+                .insert(payload)
+                .select('id')
+                .single()
             if (insertError) throw insertError
             await fetchSubscriptions({ silent: true })
+            return data.id as string
         },
         [supabase, userId, fetchSubscriptions]
     )

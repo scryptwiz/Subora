@@ -1,41 +1,32 @@
+import { AddSubscriptionHeader } from '@/components/add-subscription/add-subscription-header'
+import { BillingAndRemindersCard } from '@/components/add-subscription/billing-and-reminders-card'
 import { BrandPreviewCard } from '@/components/add-subscription/brand-preview-card'
-import { DatePickerRow } from '@/components/add-subscription/date-picker-row'
 import { EmojiPickerModal } from '@/components/add-subscription/emoji-picker-modal'
-import { DetailRow, FieldLabel, RowDivider } from '@/components/add-subscription/form-fields'
+import { FieldLabel } from '@/components/add-subscription/form-fields'
 import { PresetChips } from '@/components/add-subscription/preset-chips'
 import { PriceAndCycleFields } from '@/components/add-subscription/price-and-cycle-fields'
+import { SaveSubscriptionButton } from '@/components/add-subscription/save-subscription-button'
 import { DEFAULT_CURRENCY } from '@/constants/currencies'
 import { usePreferences } from '@/contexts/preferences-context'
 import { useSubscriptions } from '@/contexts/subscriptions-context'
+import { useSupabase } from '@/hooks/use-supabase'
 import { dateToBillingIso, formatBillingDate } from '@/lib/billing-date'
-import { Feather } from '@expo/vector-icons'
+import { useAuth } from '@clerk/expo'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
-} from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { type BrandPreset } from '../../lib/brand-presets'
 import { deriveDomain } from '../../lib/logo'
-import {
-    formatCurrency,
-    searchPresets,
-    type BillingCycle,
-} from '../../lib/subscriptions'
+import { searchPresets, type BillingCycle } from '../../lib/subscriptions'
 
 export default function AddSubscriptionScreen() {
     const insets = useSafeAreaInsets()
     const router = useRouter()
     const params = useLocalSearchParams<{ id?: string }>()
     const editingId = typeof params.id === 'string' && params.id.length > 0 ? params.id : undefined
+    const supabase = useSupabase()
+    const { userId } = useAuth()
     const { subscriptions, insertSubscription, updateSubscription, configured } = useSubscriptions()
     const editingSubscription = useMemo(
         () => (editingId ? subscriptions.find(s => s.id === editingId) : undefined),
@@ -63,7 +54,7 @@ export default function AddSubscriptionScreen() {
         d.setHours(0, 0, 0, 0)
         return d
     }, [])
-    const [reminders, setReminders] = useState(true)
+    const [reminderOffsets, setReminderOffsets] = useState<number[]>([0])
     const [saving, setSaving] = useState(false)
 
     const priceRef = useRef<TextInput>(null)
@@ -78,7 +69,6 @@ export default function AddSubscriptionScreen() {
     useEffect(() => {
         if (!isEditing || hydratedFromExistingRef.current) return
         if (!editingSubscription) return
-
         setName(editingSubscription.name)
         setDomainInput(editingSubscription.domain ?? '')
         setIconSlug(editingSubscription.iconSlug)
@@ -93,16 +83,26 @@ export default function AddSubscriptionScreen() {
         hydratedFromExistingRef.current = true
     }, [isEditing, editingSubscription])
 
-    const suggestions = useMemo(() => searchPresets(name, 5), [name])
+    useEffect(() => {
+        if (!isEditing || !editingId || !supabase || !userId) return
+        void supabase
+            .from('subscription_reminders')
+            .select('offset_days')
+            .eq('subscription_id', editingId)
+            .eq('user_id', userId)
+            .then(({ data }) => {
+                const offsets = ((data ?? []) as { offset_days: number }[]).map(r => r.offset_days)
+                setReminderOffsets(offsets.length ? offsets : [0])
+            })
+    }, [isEditing, editingId, supabase, userId])
 
+    const suggestions = useMemo(() => searchPresets(name, 5), [name])
     const effectiveDomain = useMemo(
         () => domainInput.trim() || deriveDomain(name) || undefined,
         [domainInput, name]
     )
-
     const priceNumber = parseFloat(price.replace(',', '.'))
     const isValid = name.trim().length > 0 && Number.isFinite(priceNumber) && priceNumber > 0
-
     const applyPreset = (preset: BrandPreset) => {
         setName(preset.name)
         setDomainInput(preset.domain)
@@ -123,6 +123,20 @@ export default function AddSubscriptionScreen() {
         setEmoji(next)
         setIconSlug(undefined)
         setBrandColor(undefined)
+    }
+
+    const saveReminders = async (subscriptionId: string, offsets: number[]) => {
+        if (!supabase || !userId) return
+        const unique = [...new Set(offsets)].filter(v => v >= 0 && v <= 30).slice(0, 3)
+        await supabase.from('subscription_reminders').delete().eq('subscription_id', subscriptionId).eq('user_id', userId)
+        if (!unique.length) return
+        const rows = unique.map(offset => ({
+            user_id: userId,
+            subscription_id: subscriptionId,
+            offset_days: offset,
+        }))
+        const { error } = await supabase.from('subscription_reminders').insert(rows)
+        if (error) throw error
     }
 
     const handleSave = async () => {
@@ -152,8 +166,9 @@ export default function AddSubscriptionScreen() {
                     nextRenewal: dateToBillingIso(renewalDate),
                     active,
                 })
+                await saveReminders(editingId, reminderOffsets)
             } else {
-                await insertSubscription({
+                const newId = await insertSubscription({
                     name: name.trim(),
                     domain,
                     plan: undefined,
@@ -166,6 +181,7 @@ export default function AddSubscriptionScreen() {
                     nextRenewal: dateToBillingIso(renewalDate),
                     active: true,
                 })
+                await saveReminders(newId, reminderOffsets)
             }
             router.back()
         } catch (e) {
@@ -192,35 +208,13 @@ export default function AddSubscriptionScreen() {
                 keyboardShouldPersistTaps='handled'
                 showsVerticalScrollIndicator={false}
             >
-                <View className='flex-row items-center justify-between'>
-                    <Pressable
-                        onPress={() => router.back()}
-                        accessibilityLabel='Close'
-                        className='h-10 w-10 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]'
-                        style={({ pressed }) => (pressed ? { opacity: 0.8 } : undefined)}
-                    >
-                        <Feather name='x' size={18} color='#FFFFFF' />
-                    </Pressable>
-                    <Text className='font-inter-medium text-base text-white'>
-                        {isEditing ? 'Edit subscription' : 'New subscription'}
-                    </Text>
-                    <Pressable
-                        onPress={() => void handleSave()}
-                        disabled={!isValid || saving}
-                        hitSlop={8}
-                    >
-                        {saving ? (
-                            <ActivityIndicator color='#FFFFFF' size='small' />
-                        ) : (
-                            <Text
-                                className={`font-inter-medium text-sm ${isValid ? 'text-white' : 'text-neutral-600'}`}
-                            >
-                                Save
-                            </Text>
-                        )}
-                    </Pressable>
-                </View>
-
+                <AddSubscriptionHeader
+                    isEditing={isEditing}
+                    isValid={isValid}
+                    saving={saving}
+                    onClose={() => router.back()}
+                    onSave={() => void handleSave()}
+                />
                 <BrandPreviewCard
                     name={name}
                     effectiveDomain={effectiveDomain}
@@ -229,7 +223,6 @@ export default function AddSubscriptionScreen() {
                     emoji={emoji}
                     onPressLogo={() => setEmojiPickerOpen(true)}
                 />
-
                 <View className='gap-3'>
                     <FieldLabel icon='tag' label='Service' />
                     <TextInput
@@ -239,7 +232,7 @@ export default function AddSubscriptionScreen() {
                         placeholderTextColor='#52525B'
                         autoCapitalize='words'
                         autoCorrect={false}
-                        className='h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base text-white'
+                        className='h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white'
                         returnKeyType='next'
                         onSubmitEditing={() => priceRef.current?.focus()}
                     />
@@ -261,7 +254,7 @@ export default function AddSubscriptionScreen() {
                         keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
                         autoCapitalize='none'
                         autoCorrect={false}
-                        className='h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base text-white'
+                        className='h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white'
                     />
                 </View>
 
@@ -275,53 +268,24 @@ export default function AddSubscriptionScreen() {
                     onCurrencyChange={setCurrency}
                 />
 
-                <View className='gap-3'>
-                    <FieldLabel icon='calendar' label='Billing' />
-                    <View className='overflow-hidden rounded-2xl border border-[#1F1F22] bg-[#16161A]'>
-                        <DatePickerRow
-                            icon='calendar'
-                            title='Renewal date'
-                            value={renewalDate}
-                            onChange={setRenewalDate}
-                            formatValue={formatBillingDate}
-                            minimumDate={minRenewalDate}
-                        />
-                        <RowDivider />
-                        <DetailRow
-                            icon='bell'
-                            title='Renewal reminder'
-                            value={reminders ? 'On' : 'Off'}
-                            onPress={() => setReminders(prev => !prev)}
-                        />
-                    </View>
-                </View>
+                <BillingAndRemindersCard
+                    renewalDate={renewalDate}
+                    minRenewalDate={minRenewalDate}
+                    onRenewalDateChange={setRenewalDate}
+                    formatRenewalDate={formatBillingDate}
+                    reminderOffsets={reminderOffsets}
+                    onReminderOffsetsChange={setReminderOffsets}
+                />
 
-                <Pressable
+                <SaveSubscriptionButton
+                    isValid={isValid}
+                    saving={saving}
+                    isEditing={isEditing}
+                    priceNumber={priceNumber}
+                    currency={currency}
+                    cycle={cycle}
                     onPress={() => void handleSave()}
-                    disabled={!isValid || saving}
-                    className={`h-16 items-center justify-center rounded-2xl ${isValid && !saving ? 'bg-white' : 'bg-white/20'
-                        }`}
-                    style={({ pressed }) =>
-                        pressed && isValid && !saving ? { opacity: 0.85 } : undefined
-                    }
-                >
-                    {saving ? (
-                        <ActivityIndicator color='#111111' />
-                    ) : (
-                        <Text
-                            className={`font-inter-medium text-lg ${isValid ? 'text-[#111111]' : 'text-neutral-500'
-                                }`}
-                        >
-                            {isValid
-                                ? isEditing
-                                    ? `Save · ${formatCurrency(priceNumber, currency)} / ${cycle}`
-                                    : `Add ${formatCurrency(priceNumber, currency)} / ${cycle}`
-                                : isEditing
-                                    ? 'Save changes'
-                                    : 'Add subscription'}
-                        </Text>
-                    )}
-                </Pressable>
+                />
             </ScrollView>
 
             <EmojiPickerModal

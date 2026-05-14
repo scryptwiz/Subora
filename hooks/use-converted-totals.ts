@@ -1,27 +1,22 @@
 import { usePreferences } from '@/contexts/preferences-context'
 import { useSubscriptions } from '@/contexts/subscriptions-context'
 import { getRates, type RatesSnapshot } from '@/lib/exchange-rates'
-import {
-    formatMultiCurrencyBreakdown,
-    sumMonthlyInDisplayCurrency,
-} from '@/lib/subscription-totals'
+import { formatMultiCurrencyBreakdown } from '@/lib/subscription-totals'
+import { sumPeriodSpendInDisplayCurrency } from '@/lib/spend-by-period'
 import { formatCurrency } from '@/lib/subscriptions'
 import { useEffect, useMemo, useState } from 'react'
 
 export type ConvertedTotals = {
     snapshot: RatesSnapshot | null
-    /** Monthly equivalent sum in display currency, or null if FX incomplete */
+    /** Sum in display currency for the calendar month view (yearly = full price only if renewing this month). */
     monthlyNumber: number | null
     yearlyNumber: number | null
     weeklyNumber: number | null
-    /** Single-line formatted total when FX ok */
     monthlyLabel: string
     yearlyLabel: string
     weeklyLabel: string
-    /** Multi-currency fallback copy when monthlyNumber is null */
     fallbackLabel: string
     fxIncomplete: boolean
-    /** True once the first FX fetch resolved (success or failure). */
     fxAttempted: boolean
 }
 
@@ -53,18 +48,20 @@ export function useConvertedSpendTotals(): ConvertedTotals {
         }
     }, [displayCurrency])
 
-    const aggregated = useMemo(
-        () => sumMonthlyInDisplayCurrency(subscriptions, displayCurrency, snapshot),
-        [subscriptions, displayCurrency, snapshot]
-    )
+    const aggregated = useMemo(() => {
+        const now = new Date()
+        return {
+            month: sumPeriodSpendInDisplayCurrency(subscriptions, 'month', displayCurrency, snapshot, now),
+            week: sumPeriodSpendInDisplayCurrency(subscriptions, 'week', displayCurrency, snapshot, now),
+            year: sumPeriodSpendInDisplayCurrency(subscriptions, 'year', displayCurrency, snapshot, now),
+        }
+    }, [subscriptions, displayCurrency, snapshot])
 
-    const monthlyNumber = aggregated.totalInDisplay
-    const yearlyNumber =
-        monthlyNumber === null ? null : monthlyNumber === 0 ? 0 : monthlyNumber * 12
-    const weeklyNumber =
-        monthlyNumber === null ? null : monthlyNumber === 0 ? 0 : (monthlyNumber * 12) / 52
+    const monthlyNumber = aggregated.month.totalInDisplay
+    const weeklyNumber = aggregated.week.totalInDisplay
+    const yearlyNumber = aggregated.year.totalInDisplay
 
-    const fallbackLabel = formatMultiCurrencyBreakdown(aggregated.byCurrency)
+    const fallbackLabel = formatMultiCurrencyBreakdown(aggregated.month.byCurrency)
 
     const monthlyLabel =
         monthlyNumber !== null
@@ -74,14 +71,14 @@ export function useConvertedSpendTotals(): ConvertedTotals {
     const yearlyLabel =
         yearlyNumber !== null
             ? formatCurrency(yearlyNumber, displayCurrency)
-            : fallbackLabel || '—'
+            : formatMultiCurrencyBreakdown(aggregated.year.byCurrency) || fallbackLabel || '—'
 
     const weeklyLabel =
         weeklyNumber !== null
             ? formatCurrency(weeklyNumber, displayCurrency)
-            : fallbackLabel || '—'
+            : formatMultiCurrencyBreakdown(aggregated.week.byCurrency) || fallbackLabel || '—'
 
-    const fxIncomplete = monthlyNumber === null && Object.keys(aggregated.byCurrency).length > 0
+    const fxIncomplete = monthlyNumber === null && Object.keys(aggregated.month.byCurrency).length > 0
 
     return {
         snapshot,

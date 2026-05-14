@@ -7,7 +7,7 @@ type DeletableUser = {
 
 /**
  * Permanently erases a user's footprint:
- *   1. their rows in Supabase (subscriptions, user_settings)
+ *   1. their rows in Supabase (subscriptions, push_tokens, user_settings)
  *   2. their Clerk identity itself
  *
  * Order matters. Supabase data is removed FIRST while the Clerk session token
@@ -36,6 +36,11 @@ export async function deleteAccount(args: {
         .eq('user_id', userId)
     if (subsError) {
         throw new Error(`Could not delete subscriptions: ${subsError.message}`)
+    }
+
+    const { error: tokensError } = await supabase.from('push_tokens').delete().eq('user_id', userId)
+    if (tokensError) {
+        throw new Error(`Could not delete push tokens: ${tokensError.message}`)
     }
 
     const { error: settingsError } = await supabase

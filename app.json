@@ -54,7 +54,8 @@
         {
           "photosPermission": "Subora needs access to your photos to set your profile picture."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

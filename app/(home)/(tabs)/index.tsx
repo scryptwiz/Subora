@@ -1,7 +1,9 @@
 import { useSubscriptions } from '@/contexts/subscriptions-context'
 import { useConvertedSpendTotals } from '@/hooks/use-converted-totals'
 import { usePreferences } from '@/contexts/preferences-context'
+import { profileDisplayName } from '@/lib/profile-display-name'
 import { buildRollingSpendChartBars } from '@/lib/spending-chart-bars'
+import { formatSpendLabelForPeriod } from '@/lib/spend-by-period'
 import { useUser } from '@clerk/expo'
 import { Feather } from '@expo/vector-icons'
 import { Link, useRouter } from 'expo-router'
@@ -14,10 +16,7 @@ import { PeriodPill, type Period } from '../../../components/subscriptions/perio
 import { SpendingChart } from '../../../components/subscriptions/spending-chart'
 import { StatCard } from '../../../components/subscriptions/stat-card'
 import { SwipeableSubscriptionRow } from '../../../components/subscriptions/swipeable-subscription-row'
-import {
-    nextRenewalLabel,
-    type Subscription,
-} from '../../../lib/subscriptions'
+import { nextRenewalLabel, type Subscription } from '../../../lib/subscriptions'
 
 const TODAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
@@ -46,7 +45,7 @@ export default function DashboardScreen() {
 
     const bellButton = ({ size = 18 }: { size?: number }) => (
         <Pressable
-            onPress={() => router.push('/(home)/(tabs)/profile')}
+            onPress={() => router.push('/(home)/notifications')}
             accessibilityRole='button'
             accessibilityLabel='Notifications'
             className='h-11 w-11 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]'
@@ -61,19 +60,31 @@ export default function DashboardScreen() {
         useNativeDriver: false,
     })
 
+    const spendLabels = useMemo(() => {
+        const now = new Date()
+        const snap = converted.snapshot
+        const cur = displayCurrency
+        return {
+            week: formatSpendLabelForPeriod(subs, 'week', cur, snap, now),
+            month: formatSpendLabelForPeriod(subs, 'month', cur, snap, now),
+            year: formatSpendLabelForPeriod(subs, 'year', cur, snap, now),
+            all: formatSpendLabelForPeriod(subs, 'all', cur, snap, now),
+        }
+    }, [subs, displayCurrency, converted.snapshot])
+
     const spendingHeadline = useMemo(() => {
         switch (period) {
             case 'week':
-                return converted.weeklyLabel
+                return spendLabels.week
             case 'year':
-                return converted.yearlyLabel
+                return spendLabels.year
             case 'all':
-                return converted.yearlyLabel
+                return spendLabels.all
             case 'month':
             default:
-                return converted.monthlyLabel
+                return spendLabels.month
         }
-    }, [period, converted])
+    }, [period, spendLabels])
 
     const upcoming = useMemo(
         () =>
@@ -95,7 +106,7 @@ export default function DashboardScreen() {
         [subs, displayCurrency, converted.snapshot]
     )
 
-    const greeting = user?.firstName ?? user?.username ?? 'there'
+    const greeting = profileDisplayName(user, 'there')
 
     const handleDelete = (sub: Subscription) => {
         Alert.alert(
@@ -187,7 +198,7 @@ export default function DashboardScreen() {
                     <StatCard label='Active' value={String(activeCount)} caption='services' />
                     <StatCard
                         label='Per year'
-                        value={converted.yearlyLabel}
+                        value={spendLabels.year}
                         caption='at this pace'
                         accent='highlight'
                     />

@@ -1,0 +1,21 @@
+# Supabase local / CLI. Link remote: `supabase link --project-ref <ref>`.
+# Cron: Dashboard → Edge Functions → send-renewal-reminders → Schedules, header Authorization: Bearer <CRON_SECRET>.
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+# Cron uses CRON_SECRET header, not Supabase JWT.
+[functions.send-renewal-reminders]
+verify_jwt = false

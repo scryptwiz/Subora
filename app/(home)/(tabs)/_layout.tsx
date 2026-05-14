@@ -1,3 +1,4 @@
+import { useNotificationPermission } from '@/contexts/notification-permission-context'
 import { Entypo, Feather, FontAwesome } from '@expo/vector-icons'
 import { Tabs, useRouter } from 'expo-router'
 import React from 'react'
@@ -15,6 +16,7 @@ const FAB_ICON_SIZE = Math.round(TAB_ICON_SIZE * 1.35)
 export default function TabsLayout() {
     const insets = useSafeAreaInsets()
     const router = useRouter()
+    const { showEnableNotificationsCue } = useNotificationPermission()
 
     const bottomInset = Math.max(insets.bottom, 10)
 
@@ -77,7 +79,16 @@ export default function TabsLayout() {
                     options={{
                         title: 'Profile',
                         tabBarIcon: ({ color }) => (
-                            <FontAwesome name='user' size={TAB_ICON_SIZE} color={color} />
+                            <View className='items-center justify-center' style={{ position: 'relative' }}>
+                                <FontAwesome name='user' size={TAB_ICON_SIZE} color={color} />
+                                {showEnableNotificationsCue ? (
+                                    <View
+                                        className='absolute rounded-full border-2 border-[#111317] bg-red-500'
+                                        style={{ width: 10, height: 10, top: 2, right: -4 }}
+                                        accessibilityLabel='Notifications are off'
+                                    />
+                                ) : null}
+                            </View>
                         ),
                     }}
                 />

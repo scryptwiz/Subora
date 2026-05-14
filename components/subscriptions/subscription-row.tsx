@@ -15,6 +15,17 @@ type Props = {
     rightLabel?: string
 }
 
+function renewalDateLabel(nextRenewalIso: string, billingCycle: Subscription['billingCycle']): string {
+    const date = new Date(nextRenewalIso)
+    if (Number.isNaN(date.getTime())) return 'No renewal date'
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        ...(billingCycle === 'year' ? { year: 'numeric' as const } : {}),
+    })
+    return formatter.format(date)
+}
+
 /**
  * A single subscription row used on the dashboard history list and the
  * "all subscriptions" screen.
@@ -26,11 +37,7 @@ export function SubscriptionRow({
     onPress,
     rightLabel,
 }: Props) {
-    const cycleSuffix = subscription.billingCycle === 'month'
-        ? '/ month'
-        : subscription.billingCycle === 'year'
-            ? '/ year'
-            : '/ week'
+    const renewalLabel = renewalDateLabel(subscription.nextRenewal, subscription.billingCycle)
 
     return (
         <Pressable
@@ -60,7 +67,7 @@ export function SubscriptionRow({
                             {formatCurrency(subscription.price, subscription.currency)}
                         </Text>
                         <Text className='mt-0.5 font-inter text-xs text-neutral-500'>
-                            {cycleSuffix}
+                            {renewalLabel}
                         </Text>
                     </View>
                     <View className='ml-3 items-end justify-center'>

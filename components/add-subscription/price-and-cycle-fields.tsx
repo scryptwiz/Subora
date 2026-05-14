@@ -38,7 +38,7 @@ export const PriceAndCycleFields = forwardRef<TextInput, Props>(
                         placeholder='0.00'
                         placeholderTextColor='#52525B'
                         keyboardType='decimal-pad'
-                        className='flex-1 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 py-3.5 font-inter-bold text-2xl text-white'
+                        className='flex-1 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 py-3.5 font-inter-bold text-2xl leading-7 text-white'
                     />
                 </View>
 
