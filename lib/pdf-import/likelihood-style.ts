@@ -13,15 +13,30 @@ export function likelihoodLabel(l: SubscriptionLikelihood): string {
   }
 }
 
-export function likelihoodBadgeClass(l: SubscriptionLikelihood): string {
+export function likelihoodBadgeContainerClass(
+  l: SubscriptionLikelihood,
+): string {
   switch (l) {
     case "high":
-      return "bg-emerald-500/20 text-emerald-300";
+      return "border border-emerald-400/50 bg-emerald-500/30";
     case "medium":
-      return "bg-amber-500/20 text-amber-300";
+      return "border border-amber-400/50 bg-amber-500/30";
     case "low":
-      return "bg-zinc-500/20 text-zinc-400";
+      return "border border-zinc-400/40 bg-zinc-500/30";
     case "not":
-      return "bg-zinc-700/40 text-zinc-500";
+      return "border border-zinc-500/50 bg-zinc-600/40";
+  }
+}
+
+export function likelihoodBadgeTextClass(l: SubscriptionLikelihood): string {
+  switch (l) {
+    case "high":
+      return "text-emerald-100";
+    case "medium":
+      return "text-amber-100";
+    case "low":
+      return "text-zinc-200";
+    case "not":
+      return "text-zinc-300";
   }
 }

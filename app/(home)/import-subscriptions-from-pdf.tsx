@@ -5,12 +5,12 @@ import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useSupabase } from "@/hooks/use-supabase";
 import { saveSubscriptionReminders } from "@/lib/add-subscription/save-reminders";
 import { dateToBillingIso } from "@/lib/billing-date";
+import { MAX_PDF_MB } from "@/lib/constants/pdf-import";
 import {
   countSelected,
   filterImportRows,
   toImportRows,
 } from "@/lib/pdf-import/import-rows";
-import { MAX_PDF_MB } from "@/lib/constants/pdf-import";
 import { parseSubscriptionPdf } from "@/lib/pdf-import/parse-subscription-pdf";
 import type { ImportFilter, ImportRowState } from "@/types/pdf-import";
 import { useAuth } from "@clerk/expo";
@@ -242,7 +242,7 @@ export default function ImportSubscriptionsFromPdfScreen() {
               </View>
             ) : null}
             <ImportPdfFilterChips value={filter} onChange={setFilter} />
-            <Text className="font-inter text-xs text-[#71717A]">
+            <Text className="font-inter text-xs text-[#A1A1AA]">
               {selectedCount} selected for import · {visibleRows.length} shown
             </Text>
           </View>

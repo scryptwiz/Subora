@@ -1,5 +1,6 @@
 import {
-  likelihoodBadgeClass,
+  likelihoodBadgeContainerClass,
+  likelihoodBadgeTextClass,
   likelihoodLabel,
 } from "@/lib/pdf-import/likelihood-style";
 import { formatCurrency } from "@/lib/subscriptions";
@@ -52,14 +53,16 @@ export function ImportPdfRow({
             {title}
           </Text>
           <View
-            className={`rounded-full px-2 py-0.5 ${likelihoodBadgeClass(line.subscriptionLikelihood)}`}
+            className={`rounded-full px-2 py-0.5 ${likelihoodBadgeContainerClass(line.subscriptionLikelihood)}`}
           >
-            <Text className="font-inter text-[10px] font-medium">
+            <Text
+              className={`font-inter text-[10px] font-medium ${likelihoodBadgeTextClass(line.subscriptionLikelihood)}`}
+            >
               {likelihoodLabel(line.subscriptionLikelihood)}
             </Text>
           </View>
         </View>
-        <Text className="font-inter text-xs text-[#71717A]" numberOfLines={1}>
+        <Text className="font-inter text-xs text-[#A1A1AA]" numberOfLines={1}>
           {line.rawDescription}
         </Text>
         <View className="flex-row items-center justify-between">
@@ -70,7 +73,7 @@ export function ImportPdfRow({
         </View>
         {line.rationale ? (
           <Text
-            className="font-inter text-[11px] leading-4 text-[#52525B]"
+            className="font-inter text-[11px] leading-4 text-[#9CA3AF]"
             numberOfLines={2}
           >
             {line.rationale}
@@ -84,14 +87,14 @@ export function ImportPdfRow({
           accessibilityLabel="Edit before import"
           className="h-8 w-8 items-center justify-center rounded-lg border border-[#27272A]"
         >
-          <Feather name="edit-2" size={14} color="#A1A1AA" />
+          <Feather name="edit-2" size={14} color="#D4D4D8" />
         </Pressable>
         <Pressable
           onPress={onRemove}
           accessibilityLabel="Remove from list"
           className="h-8 w-8 items-center justify-center rounded-lg border border-[#27272A]"
         >
-          <Feather name="trash-2" size={14} color="#A1A1AA" />
+          <Feather name="trash-2" size={14} color="#D4D4D8" />
         </Pressable>
       </View>
     </View>
