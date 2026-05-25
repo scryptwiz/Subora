@@ -19,3 +19,6 @@ port = 54323
 # Cron uses CRON_SECRET header, not Supabase JWT.
 [functions.send-renewal-reminders]
 verify_jwt = false
+
+[functions.parse-subscription-pdf]
+verify_jwt = false
