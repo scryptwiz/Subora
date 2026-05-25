@@ -10,6 +10,7 @@ import {
   filterImportRows,
   toImportRows,
 } from "@/lib/pdf-import/import-rows";
+import { MAX_PDF_MB } from "@/lib/constants/pdf-import";
 import { parseSubscriptionPdf } from "@/lib/pdf-import/parse-subscription-pdf";
 import type { ImportFilter, ImportRowState } from "@/types/pdf-import";
 import { useAuth } from "@clerk/expo";
@@ -211,7 +212,7 @@ export default function ImportSubscriptionsFromPdfScreen() {
               Choose PDF
             </Text>
             <Text className="mt-1 px-6 text-center font-inter text-xs text-[#71717A]">
-              Receipt or bank/card statement (max 2 MB)
+              Receipt or bank/card statement (max {MAX_PDF_MB} MB)
             </Text>
           </Pressable>
         </View>

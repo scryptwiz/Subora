@@ -9,7 +9,7 @@ const MESSAGES: Record<ParseErrorCode, string> = {
   SERVICE_UNAVAILABLE:
     "Could not process this PDF right now. Please try again shortly.",
   PARSE_FAILED:
-    "Could not read this PDF. Try a shorter statement or add subscriptions manually.",
+    "Could not read this PDF. Check the file is a clear statement or receipt, then try again.",
   UNAVAILABLE: "PDF import is temporarily unavailable. Please try again later.",
 };
 

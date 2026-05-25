@@ -1,4 +1,5 @@
-import { DEFAULT_GEMINI_MODEL } from "./constants.ts";
+import { DEFAULT_GEMINI_MODEL, MAX_OUTPUT_TOKENS } from "./constants.ts";
+import { parseModelResponseText } from "./parse-model-response.ts";
 import { ParseUserError } from "./parse-errors.ts";
 
 export type GeminiRawLine = {
@@ -31,7 +32,9 @@ For each line set subscriptionLikelihood:
 
 When in doubt between low and not, use low if it is still a merchant purchase.
 
-If there are more rows than you can list, set modelTruncated true and estimatedOmittedCount to your best estimate of rows you could not include. Prioritize rows with subscriptionLikelihood high or medium when you must drop rows.
+Statements often have 200–400 transaction rows: include every row you can read. Keep each row compact (omit rationale for low and not rows).
+
+If you cannot fit every row in the response, set modelTruncated true and estimatedOmittedCount; prioritize high and medium subscriptionLikelihood rows.
 
 Return strict JSON only (no markdown).`;
 
@@ -118,7 +121,7 @@ export async function extractWithGemini(
     ],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 8192,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       responseMimeType: "application/json",
       responseSchema: buildResponseSchema(),
     },
@@ -143,21 +146,20 @@ export async function extractWithGemini(
   }
 
   const data = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
+    candidates?: {
+      content?: { parts?: { text?: string }[] };
+      finishReason?: string;
+    }[];
   };
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const candidate = data.candidates?.[0];
+  const text = candidate?.content?.parts?.[0]?.text;
   if (!text) {
     throw new ParseUserError("PARSE_FAILED");
   }
 
-  let parsed: GeminiExtractResult;
-  try {
-    parsed = JSON.parse(text) as GeminiExtractResult;
-  } catch {
-    throw new ParseUserError("PARSE_FAILED");
-  }
-  if (!parsed.lines || !Array.isArray(parsed.lines)) {
-    throw new ParseUserError("PARSE_FAILED");
+  const parsed = parseModelResponseText(text);
+  if (candidate?.finishReason === "MAX_TOKENS") {
+    parsed.modelTruncated = true;
   }
   return parsed;
 }

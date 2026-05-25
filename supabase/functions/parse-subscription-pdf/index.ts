@@ -120,6 +120,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       geminiModel,
     );
     const result = postProcessGeminiResult(geminiResult);
+    if (result.lines.length === 0) {
+      return jsonResponse(
+        { error: new ParseUserError("PARSE_FAILED").message },
+        400,
+      );
+    }
 
     console.log(
       JSON.stringify({

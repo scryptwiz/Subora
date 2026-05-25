@@ -3,7 +3,7 @@ const RATE_LIMIT =
 const UNAVAILABLE =
   "Could not process this PDF right now. Please try again shortly.";
 const GENERIC =
-  "Could not read this PDF. Try a shorter statement or add subscriptions manually.";
+  "Could not read this PDF. Check the file is a clear statement or receipt, then try again.";
 
 const INTERNAL_PATTERN =
   /gemini|generativelanguage|openai|anthropic|api[_-]?key|edge function returned/i;

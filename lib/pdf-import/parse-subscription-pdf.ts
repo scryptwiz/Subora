@@ -1,3 +1,4 @@
+import { MAX_PDF_BYTES, MAX_PDF_MB } from "@/lib/constants/pdf-import";
 import { isSupabaseConfigured } from "@/hooks/use-supabase";
 import { toParsePdfUserMessage } from "@/lib/pdf-import/parse-pdf-user-message";
 import {
@@ -7,8 +8,6 @@ import {
 import type { ParsePdfResponse } from "@/types/pdf-import";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as FileSystem from "expo-file-system/legacy";
-
-const MAX_PDF_BYTES = 2 * 1024 * 1024;
 
 export async function parseSubscriptionPdf(
   supabase: SupabaseClient,
@@ -40,8 +39,8 @@ async function runParseSubscriptionPdf(
     throw new Error("Could not read the selected file.");
   }
   const size = info.size;
-  if (size > MAX_PDF_BYTES) {
-    throw new Error("PDF is too large (max 2 MB).");
+  if (typeof size === "number" && size > MAX_PDF_BYTES) {
+    throw new Error(`PDF is too large (max ${MAX_PDF_MB} MB).`);
   }
 
   const pdfBase64 = await FileSystem.readAsStringAsync(fileUri, {
