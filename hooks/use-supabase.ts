@@ -1,9 +1,9 @@
-import { useAuth } from '@clerk/expo'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { useEffect, useMemo, useRef } from 'react'
+import { useAuth } from "@clerk/expo";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { useEffect, useMemo, useRef } from "react";
 
 export function isSupabaseConfigured(): boolean {
-    return Boolean(process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY)
+  return Boolean(process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 /**
@@ -12,25 +12,25 @@ export function isSupabaseConfigured(): boolean {
  * itself is created exactly once — preventing render loops in consumers.
  */
 export function useSupabase(): SupabaseClient | null {
-    const { getToken, isLoaded } = useAuth()
+  const { getToken, isLoaded } = useAuth();
 
-    const getTokenRef = useRef(getToken)
-    useEffect(() => {
-        getTokenRef.current = getToken
-    }, [getToken])
+  const getTokenRef = useRef(getToken);
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
 
-    return useMemo(() => {
-        const url = process.env.EXPO_PUBLIC_SUPABASE_URL
-        const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-        if (!url || !anonKey || !isLoaded) return null
+  return useMemo(() => {
+    const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !anonKey || !isLoaded) return null;
 
-        return createClient(url, anonKey, {
-            accessToken: async () => (await getTokenRef.current()) ?? null,
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false,
-            },
-        })
-    }, [isLoaded])
+    return createClient(url, anonKey, {
+      accessToken: async () => (await getTokenRef.current({ template: "supabase" })) ?? null,
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }, [isLoaded]);
 }
