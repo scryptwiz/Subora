@@ -3,8 +3,6 @@ import { ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SkeletonBlock } from './skeleton-block'
 
-const CHART_BAR_HEIGHTS = [44, 70, 56, 90, 64, 78, 50]
-
 export function DashboardSkeleton() {
     const insets = useSafeAreaInsets()
 
@@ -29,23 +27,10 @@ export function DashboardSkeleton() {
                     <SkeletonBlock className='h-11 w-11 rounded-full' />
                 </View>
 
-                <View className='gap-5 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-5'>
-                    <View className='flex-row items-start justify-between'>
-                        <View className='gap-3'>
-                            <SkeletonBlock className='h-3 w-28 rounded-full' />
-                            <SkeletonBlock className='h-12 w-48 rounded-lg' />
-                        </View>
-                        <SkeletonBlock className='h-9 w-24 rounded-full' />
-                    </View>
-
-                    <View className='flex-row items-end justify-between gap-2 pt-2'>
-                        {CHART_BAR_HEIGHTS.map((h, i) => (
-                            <SkeletonBlock
-                                key={i}
-                                className='flex-1 rounded-md'
-                                style={{ height: h }}
-                            />
-                        ))}
+                <View className='rounded-3xl border border-[#1F1F22] bg-[#16161A] p-5'>
+                    <View className='gap-3'>
+                        <SkeletonBlock className='h-3 w-28 rounded-full' />
+                        <SkeletonBlock className='h-12 w-48 rounded-lg' />
                     </View>
                 </View>
 

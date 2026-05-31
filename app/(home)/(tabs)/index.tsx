@@ -3,20 +3,14 @@ import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useConvertedSpendTotals } from "@/hooks/use-converted-totals";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { formatSpendLabelForPeriod } from "@/lib/spend-by-period";
-import { buildRollingSpendChartBars } from "@/lib/spending-chart-bars";
 import { useUser } from "@clerk/expo";
 import { Feather } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 import { Alert, Animated, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollRevealTopChrome } from "../../../components/scroll-reveal-top-chrome";
 import { DashboardSkeleton } from "../../../components/skeletons/dashboard-skeleton";
-import {
-    PeriodPill,
-    type Period,
-} from "../../../components/subscriptions/period-pill";
-import { SpendingChart } from "../../../components/subscriptions/spending-chart";
 import { StatCard } from "../../../components/subscriptions/stat-card";
 import { SwipeableSubscriptionRow } from "../../../components/subscriptions/swipeable-subscription-row";
 import {
@@ -43,7 +37,6 @@ export default function DashboardScreen() {
   const { displayCurrency, loading: prefsLoading } = usePreferences();
   const converted = useConvertedSpendTotals();
   const initializing = subsLoading || prefsLoading || !converted.fxAttempted;
-  const [period, setPeriod] = useState<Period>("month");
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const todayLabel = useMemo(() => TODAY_FORMATTER.format(new Date()), []);
@@ -68,31 +61,27 @@ export default function DashboardScreen() {
     },
   );
 
-  const spendLabels = useMemo(() => {
+  const monthSpend = useMemo(() => {
     const now = new Date();
-    const snap = converted.snapshot;
-    const cur = displayCurrency;
-    return {
-      week: formatSpendLabelForPeriod(subs, "week", cur, snap, now),
-      month: formatSpendLabelForPeriod(subs, "month", cur, snap, now),
-      year: formatSpendLabelForPeriod(subs, "year", cur, snap, now),
-      all: formatSpendLabelForPeriod(subs, "all", cur, snap, now),
-    };
+    return formatSpendLabelForPeriod(
+      subs,
+      "month",
+      displayCurrency,
+      converted.snapshot,
+      now,
+    );
   }, [subs, displayCurrency, converted.snapshot]);
 
-  const spendingHeadline = useMemo(() => {
-    switch (period) {
-      case "week":
-        return spendLabels.week;
-      case "year":
-        return spendLabels.year;
-      case "all":
-        return spendLabels.all;
-      case "month":
-      default:
-        return spendLabels.month;
-    }
-  }, [period, spendLabels]);
+  const yearSpend = useMemo(() => {
+    const now = new Date();
+    return formatSpendLabelForPeriod(
+      subs,
+      "year",
+      displayCurrency,
+      converted.snapshot,
+      now,
+    );
+  }, [subs, displayCurrency, converted.snapshot]);
 
   const upcoming = useMemo(
     () =>
@@ -108,15 +97,6 @@ export default function DashboardScreen() {
   );
 
   const activeCount = subs.filter((s) => s.active).length;
-
-  const chartBars = useMemo(
-    () =>
-      buildRollingSpendChartBars(subs, new Date(), {
-        displayCurrency,
-        snapshot: converted.snapshot,
-      }),
-    [subs, displayCurrency, converted.snapshot],
-  );
 
   const greeting = profileDisplayName(user, "there");
 
@@ -187,19 +167,18 @@ export default function DashboardScreen() {
           </Text>
         ) : null}
 
-        <View className="gap-5 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-5">
-          <View className="flex-row items-start justify-between">
-            <View>
-              <Text className="font-inter text-xs uppercase tracking-wider text-neutral-500">
-                Your spendings
-              </Text>
-              <Text className="mt-2 font-inter-bold text-5xl text-white">
-                {spendingHeadline}
-              </Text>
-            </View>
-            <PeriodPill value={period} onChange={setPeriod} />
+        <View className="rounded-3xl border border-[#1F1F22] bg-[#16161A] p-5">
+          <Text className="font-inter text-xs uppercase tracking-wider text-neutral-500">
+            This month
+          </Text>
+          <View className="mt-2 flex-row items-baseline gap-1">
+            <Text className="font-inter-bold text-5xl text-white">
+              {monthSpend}
+            </Text>
+            <Text className="font-inter-medium text-xl text-neutral-400">
+              /mo
+            </Text>
           </View>
-          <SpendingChart bars={chartBars} />
         </View>
 
         <View className="flex-row gap-3">
@@ -210,7 +189,7 @@ export default function DashboardScreen() {
           />
           <StatCard
             label="Per year"
-            value={spendLabels.year}
+            value={yearSpend}
             caption="at this pace"
             accent="highlight"
           />

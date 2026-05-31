@@ -28,8 +28,7 @@ export function useSupabase(): SupabaseClient | null {
     if (!url || !anonKey || !isLoaded) return null;
 
     return createClient(url, anonKey, {
-      accessToken: async () =>
-        (await getTokenRef.current({ template: "supabase" })) ?? null,
+      accessToken: async () => (await getTokenRef.current()) ?? null,
       auth: {
         persistSession: false,
         autoRefreshToken: false,
