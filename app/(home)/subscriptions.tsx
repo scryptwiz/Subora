@@ -239,8 +239,8 @@ export default function SubscriptionsScreen() {
             <SwipeableSubscriptionRow
               key={sub.id}
               subscription={sub}
+              onPress={() => handleEdit(sub)}
               onToggleActive={(next) => void handleToggle(sub.id, next)}
-              onEdit={() => handleEdit(sub)}
               onDelete={() => handleDelete(sub)}
             />
           ))

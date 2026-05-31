@@ -214,7 +214,7 @@ export default function DashboardScreen() {
                   key={sub.id}
                   subscription={sub}
                   variant="history"
-                  onEdit={() => handleEdit(sub)}
+                  onPress={() => handleEdit(sub)}
                   onDelete={() => handleDelete(sub)}
                 />
               ))
