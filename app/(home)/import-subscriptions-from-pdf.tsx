@@ -4,7 +4,7 @@ import { ImportPdfRow } from "@/components/pdf-import/import-pdf-row";
 import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useSupabase } from "@/hooks/use-supabase";
 import { saveSubscriptionReminders } from "@/lib/add-subscription/save-reminders";
-import { dateToBillingIso } from "@/lib/billing-date";
+import { transactionDateToNextRenewalIso } from "@/lib/billing-date";
 import { MAX_PDF_MB } from "@/lib/constants/pdf-import";
 import {
   countSelected,
@@ -105,11 +105,10 @@ export default function ImportSubscriptionsFromPdfScreen() {
   const openEdit = useCallback(
     (row: ImportRowState) => {
       const line = row.line;
-      const renewal =
-        line.transactionDate &&
-        !Number.isNaN(new Date(line.transactionDate).getTime())
-          ? dateToBillingIso(new Date(line.transactionDate))
-          : dateToBillingIso(new Date());
+      const renewal = transactionDateToNextRenewalIso(
+        line.transactionDate,
+        line.inferredBillingCycle,
+      );
       router.push({
         pathname: "/(home)/add-subscription",
         params: {
@@ -143,11 +142,10 @@ export default function ImportSubscriptionsFromPdfScreen() {
     try {
       for (const row of toImport) {
         const line = row.line;
-        const renewal =
-          line.transactionDate &&
-          !Number.isNaN(new Date(line.transactionDate).getTime())
-            ? dateToBillingIso(new Date(line.transactionDate))
-            : dateToBillingIso(new Date());
+        const renewal = transactionDateToNextRenewalIso(
+          line.transactionDate,
+          line.inferredBillingCycle,
+        );
         const newId = await insertSubscription({
           name: (
             line.suggestedName ??

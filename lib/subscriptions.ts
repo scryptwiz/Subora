@@ -245,16 +245,32 @@ export function totalWeekly(subs: Subscription[]): number {
     return (totalMonthly(subs) * 12) / 52
 }
 
-export function nextRenewalLabel(iso: string, now = new Date()): string {
-    const date = new Date(iso)
-    const diffMs = date.getTime() - now.getTime()
-    const days = Math.round(diffMs / (1000 * 60 * 60 * 24))
+const BILLING_CYCLE_LABEL: Record<BillingCycle, string> = {
+    week: 'Weekly',
+    month: 'Monthly',
+    year: 'Yearly',
+}
 
-    if (days <= 0) return 'Today'
-    if (days === 1) return 'Tomorrow'
-    if (days < 7) return `In ${days} days`
+export function billingCycleLabel(cycle: BillingCycle): string {
+    return BILLING_CYCLE_LABEL[cycle] ?? 'Monthly'
+}
+
+export function renewalCountdownLabel(iso: string, now = new Date()): string {
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return 'No renewal date'
+
+    const today = new Date(now)
+    today.setHours(0, 0, 0, 0)
+    const target = new Date(date)
+    target.setHours(0, 0, 0, 0)
+    const days = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (days <= 0) return 'Renewal today'
+    if (days === 1) return 'Renewal tomorrow'
+    if (days < 7) return `Renewal in ${days} days`
+
     const formatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
-    return formatter.format(date)
+    return `Renewal ${formatter.format(date)}`
 }
 
 export function shortDateLabel(iso: string): string {

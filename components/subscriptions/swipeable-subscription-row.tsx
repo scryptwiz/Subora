@@ -12,7 +12,6 @@ type Variant = 'history' | 'list'
 type Props = {
     subscription: Subscription
     variant?: Variant
-    rightLabel?: string
     onToggleActive?: (next: boolean) => void
     onEdit: () => void
     onDelete: () => void
@@ -23,7 +22,6 @@ const ACTION_WIDTH = 64
 export function SwipeableSubscriptionRow({
     subscription,
     variant = 'list',
-    rightLabel,
     onToggleActive,
     onEdit,
     onDelete,
@@ -67,7 +65,6 @@ export function SwipeableSubscriptionRow({
             <SubscriptionRow
                 subscription={subscription}
                 variant={variant}
-                rightLabel={rightLabel}
                 onToggleActive={onToggleActive}
             />
         </ReanimatedSwipeable>

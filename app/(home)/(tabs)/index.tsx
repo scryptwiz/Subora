@@ -13,10 +13,7 @@ import { ScrollRevealTopChrome } from "../../../components/scroll-reveal-top-chr
 import { DashboardSkeleton } from "../../../components/skeletons/dashboard-skeleton";
 import { StatCard } from "../../../components/subscriptions/stat-card";
 import { SwipeableSubscriptionRow } from "../../../components/subscriptions/swipeable-subscription-row";
-import {
-    nextRenewalLabel,
-    type Subscription,
-} from "../../../lib/subscriptions";
+import { type Subscription } from "../../../lib/subscriptions";
 
 const TODAY_FORMATTER = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
@@ -217,7 +214,6 @@ export default function DashboardScreen() {
                   key={sub.id}
                   subscription={sub}
                   variant="history"
-                  rightLabel={nextRenewalLabel(sub.nextRenewal)}
                   onEdit={() => handleEdit(sub)}
                   onDelete={() => handleDelete(sub)}
                 />
