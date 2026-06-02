@@ -15,7 +15,7 @@ export type ParsedStatementLine = {
   suggestedDomain?: string;
   iconSlug?: string;
   brandColor?: string;
-  inferredBillingCycle?: "week" | "month" | "year";
+  inferredBillingCycle?: "month" | "year";
 };
 
 export type ParsePdfResponse = {
@@ -58,8 +58,8 @@ function isLikelihood(
   return v === "high" || v === "medium" || v === "low" || v === "not";
 }
 
-function isCycle(v: unknown): v is "week" | "month" | "year" {
-  return v === "week" || v === "month" || v === "year";
+function isCycle(v: unknown): v is "month" | "year" {
+  return v === "month" || v === "year";
 }
 
 function sanitizeLine(

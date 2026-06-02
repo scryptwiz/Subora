@@ -10,7 +10,7 @@ export type GeminiRawLine = {
   subscriptionLikelihood: "high" | "medium" | "low" | "not";
   rationale?: string | null;
   merchantGuess?: string | null;
-  inferredBillingCycle?: "week" | "month" | "year" | null;
+  inferredBillingCycle?: "month" | "year" | null;
 };
 
 export type GeminiExtractResult = {
@@ -61,7 +61,7 @@ function buildResponseSchema() {
             inferredBillingCycle: {
               type: "STRING",
               format: "enum",
-              enum: ["week", "month", "year"],
+              enum: ["month", "year"],
               nullable: true,
             },
           },

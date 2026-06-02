@@ -13,7 +13,7 @@ export type ParsedStatementLine = {
     suggestedDomain?: string
     iconSlug?: string
     brandColor?: string
-    inferredBillingCycle?: 'week' | 'month' | 'year'
+    inferredBillingCycle?: 'month' | 'year'
 }
 
 export type ParsePdfResponse = {

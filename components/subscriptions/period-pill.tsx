@@ -10,10 +10,9 @@ import {
     type View as RNView,
 } from 'react-native'
 
-export type Period = 'week' | 'month' | 'year' | 'all'
+export type Period = 'month' | 'year' | 'all'
 
 const LABELS: Record<Period, string> = {
-    week: 'Week',
     month: 'Month',
     year: 'Year',
     all: 'All time',
@@ -33,7 +32,7 @@ const MENU_GAP = 6
 /**
  * Pill-shaped select that opens a small dropdown menu anchored beneath it.
  */
-export function PeriodPill({ value, options = ['week', 'month', 'year', 'all'], onChange }: Props) {
+export function PeriodPill({ value, options = ['month', 'year', 'all'], onChange }: Props) {
     const [open, setOpen] = useState(false)
     const [anchor, setAnchor] = useState<Anchor | null>(null)
     const triggerRef = useRef<RNView>(null)

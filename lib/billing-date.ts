@@ -10,26 +10,16 @@ export function dateToBillingIso(date: Date): string {
   return utcNoon.toISOString();
 }
 
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
-function addBillingCycle(
-  date: Date,
-  billingCycle: "week" | "month" | "year",
-): Date {
-  switch (billingCycle) {
-    case "week":
-      return new Date(date.getTime() + 7 * MS_PER_DAY);
-    case "year":
-      return new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
-    case "month":
-    default:
-      return new Date(date.getFullYear(), date.getMonth() + 1, date.getDate());
+function addBillingCycle(date: Date, billingCycle: "month" | "year"): Date {
+  if (billingCycle === "year") {
+    return new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
   }
+  return new Date(date.getFullYear(), date.getMonth() + 1, date.getDate());
 }
 
 export function transactionDateToNextRenewalIso(
   transactionDate: string | undefined,
-  billingCycle: "week" | "month" | "year" = "month",
+  billingCycle: "month" | "year" = "month",
 ): string {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());

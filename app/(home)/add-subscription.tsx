@@ -16,7 +16,7 @@ import { Alert, KeyboardAvoidingView, Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function parseBillingCycle(v: unknown): BillingCycle | undefined {
-  if (v === "week" || v === "month" || v === "year") return v;
+  if (v === "month" || v === "year") return v;
   return undefined;
 }
 

@@ -206,7 +206,7 @@ export default function SubscriptionsScreen() {
             <PeriodPill
               value={spendPeriod}
               onChange={setSpendPeriod}
-              options={["week", "month", "year", "all"]}
+              options={["month", "year", "all"]}
             />
           </View>
         </View>
@@ -251,7 +251,6 @@ export default function SubscriptionsScreen() {
 }
 
 const BILLING_LABEL: Record<ServicesSpendPeriod, string> = {
-  week: "weekly",
   month: "monthly",
   year: "yearly",
   all: "all billing types",

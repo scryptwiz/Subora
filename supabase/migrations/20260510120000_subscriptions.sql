@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     brand_color text,
     price numeric(12, 2) NOT NULL CHECK (price >= 0),
     currency text NOT NULL DEFAULT 'USD',
-    billing_cycle text NOT NULL CHECK (billing_cycle IN ('week', 'month', 'year')),
+    billing_cycle text NOT NULL CHECK (billing_cycle IN ('month', 'year')),
     next_renewal timestamptz NOT NULL,
     active boolean NOT NULL DEFAULT true,
     payment_method text,
