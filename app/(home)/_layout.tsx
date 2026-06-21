@@ -34,9 +34,10 @@ export default function Layout() {
           >
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
-              name="add-subscription"
+              name="NewSubscription"
               options={{
-                presentation: "modal",
+                title: "",
+                presentation: "formSheet",
                 animation: "slide_from_bottom",
                 contentStyle: { backgroundColor: "#111111" },
               }}

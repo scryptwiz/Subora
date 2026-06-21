@@ -20,7 +20,6 @@ import {
 } from "react-native";
 
 type AddSubscriptionScreenBodyProps = {
-  insetsTop: number;
   isEditing: boolean;
   isValid: boolean;
   saving: boolean;
@@ -52,7 +51,6 @@ type AddSubscriptionScreenBodyProps = {
 };
 
 export function AddSubscriptionScreenBody({
-  insetsTop,
   isEditing,
   isValid,
   saving,
@@ -89,7 +87,7 @@ export function AddSubscriptionScreenBody({
     <ScrollView
       className="flex-1"
       contentContainerStyle={{
-        paddingTop: (Platform.OS === "ios" ? 0 : insetsTop) + 24,
+        paddingTop: 24,
         paddingHorizontal: 20,
         paddingBottom: 40,
         gap: 24,

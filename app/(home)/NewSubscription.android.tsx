@@ -1,18 +1,32 @@
-import { AddSubscriptionScreenBody } from "@/components/add-subscription/add-subscription-screen-body";
-import { EmojiPickerModal } from "@/components/add-subscription/emoji-picker-modal";
+import { AddSubscriptionHeader } from "@/components/add-subscription/add-subscription-header";
+import { BillingAndRemindersCard } from "@/components/add-subscription/billing-and-reminders-card";
+import { BrandPreviewCard } from "@/components/add-subscription/brand-preview-card";
+import { FieldLabel } from "@/components/add-subscription/form-fields";
+import { PresetChips } from "@/components/add-subscription/preset-chips";
+import { PriceAndCycleFields } from "@/components/add-subscription/price-and-cycle-fields";
+import { SaveSubscriptionButton } from "@/components/add-subscription/save-subscription-button";
 import { DEFAULT_CURRENCY } from "@/constants/currencies";
 import { usePreferences } from "@/contexts/preferences-context";
 import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useSupabase } from "@/hooks/use-supabase";
 import { saveSubscriptionReminders } from "@/lib/add-subscription/save-reminders";
-import { dateToBillingIso } from "@/lib/billing-date";
+import { dateToBillingIso, formatBillingDate } from "@/lib/billing-date";
 import { type BrandPreset } from "@/lib/brand-presets";
 import { deriveDomain } from "@/lib/logo";
 import { searchPresets, type BillingCycle } from "@/lib/subscriptions";
 import { useAuth } from "@clerk/expo";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function parseBillingCycle(v: unknown): BillingCycle | undefined {
@@ -72,6 +86,7 @@ export default function AddSubscriptionScreen() {
   }, []);
   const [reminderOffsets, setReminderOffsets] = useState<number[]>([0]);
   const [saving, setSaving] = useState(false);
+  const priceRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (isEditing) return;
@@ -252,46 +267,112 @@ export default function AddSubscriptionScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-[#111111]"
     >
-      <View className="flex-1">
-        <AddSubscriptionScreenBody
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          paddingTop: 24,
+          paddingHorizontal: 20,
+          paddingBottom: 40,
+          gap: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <AddSubscriptionHeader
           isEditing={isEditing}
           isValid={isValid}
           saving={saving}
+          onClose={() => router.back()}
+          onSave={handleSave}
+        />
+        {!isEditing ? (
+          <Pressable
+            onPress={() => router.push("/(home)/import-subscriptions-from-pdf")}
+            className="rounded-2xl border border-[#3F3F46] bg-[#18181B] px-4 py-3 active:opacity-80"
+          >
+            <Text className="font-inter text-sm font-semibold text-white">
+              Import from PDF (receipt or statement)
+            </Text>
+            <Text className="mt-1 font-inter text-xs leading-4 text-[#A1A1AA]">
+              Subora does not store the file.
+            </Text>
+          </Pressable>
+        ) : null}
+        <BrandPreviewCard
           name={name}
-          setName={setName}
-          clearLogoIfNameEdited={clearLogoIfNameEdited}
-          domainInput={domainInput}
-          setDomainInput={setDomainInput}
           effectiveDomain={effectiveDomain}
           iconSlug={iconSlug}
           brandColor={brandColor}
           emoji={emoji}
-          setEmojiPickerOpen={setEmojiPickerOpen}
-          suggestions={suggestions}
-          applyPreset={applyPreset}
+          onPressLogo={() => setEmojiPickerOpen(true)}
+        />
+        <View className="gap-3">
+          <FieldLabel icon="tag" label="Service" />
+          <TextInput
+            value={name}
+            onChangeText={clearLogoIfNameEdited}
+            placeholder="e.g. Netflix"
+            placeholderTextColor="#52525B"
+            autoCapitalize="words"
+            autoCorrect={false}
+            className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+            returnKeyType="next"
+            onSubmitEditing={() => priceRef.current?.focus()}
+          />
+
+          <PresetChips
+            suggestions={suggestions}
+            onSelect={applyPreset}
+            show={!iconSlug}
+          />
+        </View>
+
+        <View className="gap-3">
+          <FieldLabel
+            icon="globe"
+            label="Website (optional, used for the logo)"
+          />
+          <TextInput
+            value={domainInput}
+            onChangeText={setDomainInput}
+            placeholder={effectiveDomain ?? "netflix.com"}
+            placeholderTextColor="#52525B"
+            keyboardType={Platform.OS === "ios" ? "url" : "default"}
+            autoCapitalize="none"
+            autoCorrect={false}
+            className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+          />
+        </View>
+
+        <PriceAndCycleFields
+          ref={priceRef}
           price={price}
-          setPrice={setPrice}
+          onPriceChange={setPrice}
           cycle={cycle}
-          setCycle={setCycle}
+          onCycleChange={setCycle}
           currency={currency}
-          setCurrency={setCurrency}
+          onCurrencyChange={setCurrency}
+        />
+
+        <BillingAndRemindersCard
           renewalDate={renewalDate}
           minRenewalDate={minRenewalDate}
-          setRenewalDate={setRenewalDate}
+          onRenewalDateChange={setRenewalDate}
+          formatRenewalDate={formatBillingDate}
           reminderOffsets={reminderOffsets}
-          setReminderOffsets={setReminderOffsets}
-          priceNumber={priceNumber}
-          onSave={() => void handleSave()}
+          onReminderOffsetsChange={setReminderOffsets}
         />
-      </View>
 
-      <EmojiPickerModal
-        visible={emojiPickerOpen}
-        selected={emoji}
-        onClose={() => setEmojiPickerOpen(false)}
-        onSelect={handleEmojiSelect}
-        onClear={() => setEmoji(undefined)}
-      />
+        <SaveSubscriptionButton
+          isValid={isValid}
+          saving={saving}
+          isEditing={isEditing}
+          priceNumber={priceNumber}
+          currency={currency}
+          cycle={cycle}
+          onPress={handleSave}
+        />
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
