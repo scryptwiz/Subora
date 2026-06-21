@@ -4,6 +4,7 @@ import { SubscriptionsProvider } from "@/contexts/subscriptions-context";
 import { usePushRegistration } from "@/hooks/use-push-registration";
 import { useAuth } from "@clerk/expo";
 import { Redirect, Stack } from "expo-router";
+import { Platform } from "react-native";
 
 function PushTokenRegistration() {
   usePushRegistration();
@@ -36,7 +37,11 @@ export default function Layout() {
             <Stack.Screen
               name="NewSubscription"
               options={{
-                title: "",
+                headerShown: Platform.OS === "ios",
+                headerLargeTitle: true,
+                headerTransparent: Platform.OS === "ios",
+                headerTintColor: "#FFFFFF",
+                title: "Add Subscription",
                 presentation: "formSheet",
                 animation: "slide_from_bottom",
                 contentStyle: { backgroundColor: "#111111" },

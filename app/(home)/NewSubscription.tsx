@@ -1,4 +1,9 @@
-import { SUPPORTED_CURRENCIES } from "@/constants/currencies";
+import {
+  BrandPreviewCardIOS,
+  BrandPreviewProvider,
+  useBrandPreview,
+} from "@/components/add-subscription/brand-preview-card";
+import { getCurrencyOption, SUPPORTED_CURRENCIES } from "@/constants/currencies";
 import {
   Button,
   DatePicker,
@@ -28,66 +33,95 @@ import {
   tag,
 } from "@expo/ui/swift-ui/modifiers";
 import { Stack } from "expo-router";
-import { useState } from "react";
 
 const CYCLES = [
-  { tag: "monthly", label: "Monthly" },
-  { tag: "yearly", label: "Yearly" },
+  { tag: "month", label: "Monthly" },
+  { tag: "year", label: "Yearly" },
 ];
 
 const REMINDER_OPTIONS = [
-  { id: "same-day", label: "Same day" },
-  { id: "2-days", label: "2 days before" },
-  { id: "5-days", label: "5 days before" },
+  { id: 0, label: "Same day" },
+  { id: 2, label: "2 days before" },
+  { id: 5, label: "5 days before" },
 ];
 
 const MAX_REMINDERS = 3;
 
-export default function NewSubscription() {
-  const [cycle, setCycle] = useState("monthly");
-  const [currency, setCurrency] = useState(SUPPORTED_CURRENCIES[0]);
-  const [selected, setSelected] = useState<string[]>(["same-day"]);
-  const [renewalDate, setRenewalDate] = useState(new Date());
+function NewSubscriptionForm() {
+  const {
+    name,
+    setName,
+    setDomainInput,
+    price,
+    setPrice,
+    cycle,
+    setCycle,
+    currency,
+    setCurrency,
+    renewalDate,
+    setRenewalDate,
+    reminderOffsets,
+    setReminderOffsets,
+    isValid,
+    saving,
+    handleSave,
+  } = useBrandPreview();
 
-  const toggle = (id: string) => {
-    setSelected((prev) => {
-      if (prev.includes(id)) return prev.filter((item) => item !== id);
-      if (prev.length >= MAX_REMINDERS) return prev; // at cap, ignore tap
-      return [...prev, id];
-    });
+  const toggle = (offset: number) => {
+    if (reminderOffsets.includes(offset)) {
+      setReminderOffsets(reminderOffsets.filter((o) => o !== offset));
+    } else {
+      if (reminderOffsets.length >= MAX_REMINDERS) return;
+      setReminderOffsets([...reminderOffsets, offset]);
+    }
   };
+
+  const currencyOption = getCurrencyOption(currency);
 
   return (
     <>
       <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button disabled>Save</Stack.Toolbar.Button>
+        <Stack.Toolbar.Button disabled={!isValid || saving} onPress={() => void handleSave()}>
+          {saving ? "Saving..." : "Save"}
+        </Stack.Toolbar.Button>
       </Stack.Toolbar>
 
       <Host style={{ flex: 1 }} colorScheme="dark">
         <Form>
+          <Section>
+            <BrandPreviewCardIOS />
+          </Section>
+
           <Section title="Service">
-            <TextField placeholder="e.g. Netflix" autoFocus />
-            <TextField placeholder="netflix.com (Optional)" />
+            <TextField
+              placeholder="e.g. Netflix"
+              onTextChange={setName}
+              autoFocus
+            />
+            <TextField
+              placeholder="netflix.com (Optional)"
+              onTextChange={setDomainInput}
+            />
           </Section>
 
           <Section title="Price">
             <HStack spacing={12}>
               <Menu
-                label={currency.symbol}
+                label={currencyOption.symbol}
                 modifiers={[buttonStyle("bordered")]}
               >
                 {SUPPORTED_CURRENCIES.map((c) => (
                   <Button
                     key={c.code}
                     label={`${c.symbol}  ${c.code}`}
-                    onPress={() => setCurrency(c)}
+                    onPress={() => setCurrency(c.code)}
                   />
                 ))}
               </Menu>
-
               <TextField
                 placeholder="0.00"
                 modifiers={[keyboardType("decimal-pad")]}
+                onTextChange={setPrice}
               />
             </HStack>
 
@@ -117,8 +151,8 @@ export default function NewSubscription() {
 
           <Section title="Reminders (up to 3)">
             {REMINDER_OPTIONS.map((option) => {
-              const isSelected = selected.includes(option.id);
-              const atCap = selected.length >= MAX_REMINDERS && !isSelected;
+              const isSelected = reminderOffsets.includes(option.id);
+              const atCap = reminderOffsets.length >= MAX_REMINDERS && !isSelected;
 
               return (
                 <HStack
@@ -146,5 +180,13 @@ export default function NewSubscription() {
         </Form>
       </Host>
     </>
+  );
+}
+
+export default function NewSubscription() {
+  return (
+    <BrandPreviewProvider>
+      <NewSubscriptionForm />
+    </BrandPreviewProvider>
   );
 }

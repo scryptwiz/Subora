@@ -1,6 +1,9 @@
 import { AddSubscriptionHeader } from "@/components/add-subscription/add-subscription-header";
 import { BillingAndRemindersCard } from "@/components/add-subscription/billing-and-reminders-card";
-import { BrandPreviewCard } from "@/components/add-subscription/brand-preview-card";
+import {
+  BrandPreviewCard,
+  useBrandPreview,
+} from "@/components/add-subscription/brand-preview-card";
 import { FieldLabel } from "@/components/add-subscription/form-fields";
 import { PresetChips } from "@/components/add-subscription/preset-chips";
 import { PriceAndCycleFields } from "@/components/add-subscription/price-and-cycle-fields";
@@ -23,18 +26,8 @@ type AddSubscriptionScreenBodyProps = {
   isEditing: boolean;
   isValid: boolean;
   saving: boolean;
-  name: string;
-  setName: (v: string) => void;
-  clearLogoIfNameEdited: (v: string) => void;
-  domainInput: string;
-  setDomainInput: (v: string) => void;
-  effectiveDomain?: string;
-  iconSlug?: string;
-  brandColor?: string;
-  emoji?: string;
   setEmojiPickerOpen: (v: boolean) => void;
   suggestions: BrandPreset[];
-  applyPreset: (p: BrandPreset) => void;
   price: string;
   setPrice: (v: string) => void;
   cycle: BillingCycle;
@@ -54,18 +47,8 @@ export function AddSubscriptionScreenBody({
   isEditing,
   isValid,
   saving,
-  name,
-  setName,
-  clearLogoIfNameEdited,
-  domainInput,
-  setDomainInput,
-  effectiveDomain,
-  iconSlug,
-  brandColor,
-  emoji,
   setEmojiPickerOpen,
   suggestions,
-  applyPreset,
   price,
   setPrice,
   cycle,
@@ -82,6 +65,16 @@ export function AddSubscriptionScreenBody({
 }: AddSubscriptionScreenBodyProps) {
   const router = useRouter();
   const priceRef = useRef<TextInput>(null);
+
+  const {
+    name,
+    domainInput,
+    effectiveDomain,
+    iconSlug,
+    setDomainInput,
+    clearLogoIfNameEdited,
+    applyPreset,
+  } = useBrandPreview();
 
   return (
     <ScrollView
@@ -115,14 +108,9 @@ export function AddSubscriptionScreenBody({
           </Text>
         </Pressable>
       ) : null}
-      <BrandPreviewCard
-        name={name}
-        effectiveDomain={effectiveDomain}
-        iconSlug={iconSlug}
-        brandColor={brandColor}
-        emoji={emoji}
-        onPressLogo={() => setEmojiPickerOpen(true)}
-      />
+
+      <BrandPreviewCard onPressLogo={() => setEmojiPickerOpen(true)} />
+
       <View className="gap-3">
         <FieldLabel icon="tag" label="Service" />
         <TextInput
