@@ -1,3 +1,4 @@
+import NotificationBellBtn from "@/components/NotificationBellBtn";
 import { usePreferences } from "@/contexts/preferences-context";
 import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useConvertedSpendTotals } from "@/hooks/use-converted-totals";
@@ -6,7 +7,7 @@ import { formatSpendLabelForPeriod } from "@/lib/spend-by-period";
 import { useUser } from "@clerk/expo";
 import { Feather } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Alert, Animated, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollRevealTopChrome } from "../../../components/scroll-reveal-top-chrome";
@@ -37,19 +38,6 @@ export default function DashboardScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const todayLabel = useMemo(() => TODAY_FORMATTER.format(new Date()), []);
-
-  const bellButton = ({ size = 18 }: { size?: number }) => (
-    <Pressable
-      onPress={() => router.push("/(home)/notifications")}
-      accessibilityRole="button"
-      accessibilityLabel="Notifications"
-      className="h-11 w-11 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]"
-      style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-      hitSlop={8}
-    >
-      <Feather name="bell" size={size} color="#FFFFFF" />
-    </Pressable>
-  );
 
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -155,7 +143,7 @@ export default function DashboardScreen() {
               Hi, {greeting}
             </Text>
           </View>
-          {bellButton({})}
+          <NotificationBellBtn />
         </View>
 
         {error ? (

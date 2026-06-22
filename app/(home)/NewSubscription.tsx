@@ -3,7 +3,10 @@ import {
   BrandPreviewProvider,
   useBrandPreview,
 } from "@/components/add-subscription/brand-preview-card";
-import { getCurrencyOption, SUPPORTED_CURRENCIES } from "@/constants/currencies";
+import {
+  getCurrencyOption,
+  SUPPORTED_CURRENCIES,
+} from "@/constants/currencies";
 import {
   Button,
   DatePicker,
@@ -19,6 +22,7 @@ import {
   TextField,
 } from "@expo/ui/swift-ui";
 import {
+  autocorrectionDisabled,
   buttonStyle,
   contentShape,
   datePickerStyle,
@@ -29,8 +33,11 @@ import {
   onTapGesture,
   opacity,
   pickerStyle,
+  scrollContentBackground,
+  scrollIndicators,
   shapes,
   tag,
+  textInputAutocapitalization,
 } from "@expo/ui/swift-ui/modifiers";
 import { Stack } from "expo-router";
 
@@ -81,13 +88,21 @@ function NewSubscriptionForm() {
   return (
     <>
       <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button disabled={!isValid || saving} onPress={() => void handleSave()}>
+        <Stack.Toolbar.Button
+          disabled={!isValid || saving}
+          onPress={() => void handleSave()}
+        >
           {saving ? "Saving..." : "Save"}
         </Stack.Toolbar.Button>
       </Stack.Toolbar>
 
-      <Host style={{ flex: 1 }} colorScheme="dark">
-        <Form>
+      <Host style={{ flex: 1, backgroundColor: "#111111" }} colorScheme="dark">
+        <Form
+          modifiers={[
+            scrollContentBackground("hidden"),
+            scrollIndicators("hidden"),
+          ]}
+        >
           <Section>
             <BrandPreviewCardIOS />
           </Section>
@@ -101,6 +116,10 @@ function NewSubscriptionForm() {
             <TextField
               placeholder="netflix.com (Optional)"
               onTextChange={setDomainInput}
+              modifiers={[
+                textInputAutocapitalization("never"),
+                autocorrectionDisabled(true),
+              ]}
             />
           </Section>
 
@@ -152,7 +171,8 @@ function NewSubscriptionForm() {
           <Section title="Reminders (up to 3)">
             {REMINDER_OPTIONS.map((option) => {
               const isSelected = reminderOffsets.includes(option.id);
-              const atCap = reminderOffsets.length >= MAX_REMINDERS && !isSelected;
+              const atCap =
+                reminderOffsets.length >= MAX_REMINDERS && !isSelected;
 
               return (
                 <HStack

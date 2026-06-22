@@ -33,7 +33,13 @@ export default function Layout() {
               contentStyle: { backgroundColor: "#111111" },
             }}
           >
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                title: "",
+                contentStyle: { backgroundColor: "#111111" },
+              }}
+            />
             <Stack.Screen
               name="NewSubscription"
               options={{
