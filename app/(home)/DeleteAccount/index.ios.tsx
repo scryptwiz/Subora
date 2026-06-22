@@ -1,5 +1,10 @@
 import { Host, HStack, Image, Spacer, Text, VStack } from "@expo/ui/swift-ui";
-import { background, font, padding } from "@expo/ui/swift-ui/modifiers";
+import {
+  font,
+  foregroundStyle,
+  lineLimit,
+  padding,
+} from "@expo/ui/swift-ui/modifiers";
 import { router, Stack } from "expo-router";
 
 export default function DeleteAccount() {
@@ -12,28 +17,36 @@ export default function DeleteAccount() {
       </Stack.Toolbar>
 
       <Host colorScheme="dark">
-        <VStack
-          alignment="leading"
-          spacing={16}
-          modifiers={[padding({ all: 24 })]}
-        >
-          <HStack
-            modifiers={[
-              padding({ vertical: 24, horizontal: 16 }),
-              background("blue"),
-            ]}
-          >
+        <VStack alignment="leading" modifiers={[padding({ all: 24 })]}>
+          <HStack>
             <Spacer />
             <Image
               systemName="person.crop.circle.badge.minus"
               size={72}
               color="red"
+              modifiers={[padding({ top: 92, bottom: 24 })]}
             />
             <Spacer />
           </HStack>
 
-          <Text modifiers={[font({ size: 16, weight: "semibold" })]}>
+          <Text modifiers={[font({ size: 18, weight: "medium" })]}>
             Delete your account?
+          </Text>
+
+          <Text
+            modifiers={[
+              font({ size: 16 }),
+              lineLimit(0),
+              foregroundStyle("#FFFFFF8F"),
+            ]}
+          >
+            Deleting your account is a permanent, irreversible action. Once you
+            proceed, all your personal data, saved preferences, history, and
+            connected information will be permanently erased from our systems.
+            We will not be able to recover your account or any associated data
+            once this process is complete. Please be absolutely certain before
+            continuing, as you will lose access to everything linked to this
+            account immediately and forever.
           </Text>
           <Spacer />
         </VStack>
