@@ -2,7 +2,6 @@
   "expo": {
     "name": "Subora",
     "slug": "subora",
-    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ios.png",
     "scheme": "subora",

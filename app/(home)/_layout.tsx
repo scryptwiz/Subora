@@ -54,6 +54,17 @@ export default function Layout() {
               }}
             />
             <Stack.Screen
+              name="DeleteAccount"
+              options={{
+                title: "",
+                headerTintColor: "#FFFFFF",
+                headerLargeTitle: true,
+                presentation: "formSheet",
+                animation: "slide_from_bottom",
+                contentStyle: { backgroundColor: "#111111" },
+              }}
+            />
+            <Stack.Screen
               name="import-subscriptions-from-pdf"
               options={{
                 presentation: "modal",
