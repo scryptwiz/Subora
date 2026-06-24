@@ -1,6 +1,8 @@
 import { SubscriptionLogo } from "@/components/subscriptions/subscription-logo";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { Feather } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useBrandPreview } from "./context";
 
 type Props = {
@@ -17,13 +19,7 @@ export function BrandPreviewCard({ onPressLogo, plain }: Props) {
     : (effectiveDomain ?? "Tap the icon to pick an emoji");
 
   return (
-    <View
-      className={
-        plain
-          ? "items-center gap-4 py-4"
-          : "items-center gap-4 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6"
-      }
-    >
+    <View style={plain ? styles.cardContainerPlain : styles.cardContainer}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Change icon"
@@ -44,20 +40,59 @@ export function BrandPreviewCard({ onPressLogo, plain }: Props) {
             size={84}
           />
           {onPressLogo ? (
-            <View className="absolute -bottom-1 -right-1 h-7 w-7 items-center justify-center rounded-full border border-[#16161A] bg-white">
-              <Feather name="edit-2" size={12} color="#111111" />
+            <View style={styles.editBtn}>
+              <Feather
+                name="edit-2"
+                size={12}
+                color={getNativeDefault("secondaryBackground")}
+              />
             </View>
           ) : null}
         </View>
       </Pressable>
-      <View className="items-center">
-        <Text className="font-inter-bold text-xl text-white">
-          {name.trim() || "Service name"}
-        </Text>
-        <Text className="mt-1 font-inter text-xs text-neutral-500">
-          {subtitle}
-        </Text>
+      <View style={{ alignItems: "center" }}>
+        <Text style={styles.serviceName}>{name.trim() || "Service name"}</Text>
+        <Text style={styles.serviceSubtitle}>{subtitle}</Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    alignItems: "center",
+    gap: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderRadius: 24,
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    borderColor: getNativeDefault("secondaryBackground"),
+  },
+  cardContainerPlain: {
+    alignItems: "center",
+    gap: 16,
+    paddingVertical: 16,
+  },
+  serviceName: {
+    ...Typography.titleBold,
+    color: getNativeDefault("text"),
+  },
+  serviceSubtitle: {
+    ...Typography.caption,
+    marginTop: 1,
+    color: getNativeDefault("secondaryText"),
+  },
+  editBtn: {
+    position: "absolute",
+    bottom: -1,
+    right: -1,
+    height: 28,
+    width: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: getNativeDefault("secondaryBackground"),
+    backgroundColor: getNativeDefault("text"),
+    borderRadius: 99,
+  },
+});

@@ -2,7 +2,9 @@ import { NotificationPermissionProvider } from "@/contexts/notification-permissi
 import { PreferencesProvider } from "@/contexts/preferences-context";
 import { SubscriptionsProvider } from "@/contexts/subscriptions-context";
 import { usePushRegistration } from "@/hooks/use-push-registration";
+import { getNativeDefault } from "@/theme/colors";
 import { useAuth } from "@clerk/expo";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Redirect, Stack } from "expo-router";
 import { Platform } from "react-native";
 
@@ -30,14 +32,15 @@ export default function Layout() {
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: "#111111" },
             }}
           >
             <Stack.Screen
               name="(tabs)"
               options={{
                 title: "",
-                contentStyle: { backgroundColor: "#111111" },
+                contentStyle: {
+                  backgroundColor: getNativeDefault("background"),
+                },
               }}
             />
             <Stack.Screen
@@ -45,23 +48,21 @@ export default function Layout() {
               options={{
                 headerShown: Platform.OS === "ios",
                 headerLargeTitle: true,
-                headerTransparent: Platform.OS === "ios",
-                headerTintColor: "#FFFFFF",
+                headerTransparent: isLiquidGlassAvailable(),
+                headerTintColor: getNativeDefault("text"),
                 title: "Add Subscription",
                 presentation: "formSheet",
                 animation: "slide_from_bottom",
-                contentStyle: { backgroundColor: "#111111" },
               }}
             />
             <Stack.Screen
               name="DeleteAccount"
               options={{
                 title: "",
-                headerTintColor: "#FFFFFF",
+                headerTintColor: getNativeDefault("text"),
                 headerLargeTitle: true,
                 presentation: "formSheet",
                 animation: "slide_from_bottom",
-                contentStyle: { backgroundColor: "#111111" },
               }}
             />
             <Stack.Screen
@@ -69,7 +70,6 @@ export default function Layout() {
               options={{
                 presentation: "modal",
                 animation: "slide_from_bottom",
-                contentStyle: { backgroundColor: "#111111" },
               }}
             />
             <Stack.Screen name="notifications" />

@@ -1,29 +1,45 @@
-import React from 'react'
-import { Text, View } from 'react-native'
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
+import { StyleSheet, Text, View } from "react-native";
 
 type Props = {
-    label: string
-    value: string
-    caption?: string
-    accent?: 'default' | 'highlight'
+  label: string;
+  value: string;
+  caption?: string;
+};
+
+export function StatCard({ label, value, caption }: Props) {
+  return (
+    <View style={[styles.card]}>
+      <Text style={[styles.label]}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+      {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+    </View>
+  );
 }
 
-export function StatCard({ label, value, caption, accent = 'default' }: Props) {
-    const isHighlight = accent === 'highlight'
-    return (
-        <View
-            className={`flex-1 rounded-2xl border px-4 py-4 ${isHighlight
-                ? 'border-lime-400/40 bg-lime-400/10'
-                : 'border-[#1F1F22] bg-[#16161A]'
-                }`}
-        >
-            <Text className={`font-inter text-xs uppercase tracking-wider ${isHighlight ? 'text-lime-300' : 'text-neutral-500'}`}>
-                {label}
-            </Text>
-            <Text className='mt-2 font-inter-bold text-2xl text-white'>{value}</Text>
-            {caption ? (
-                <Text className='mt-1 font-inter text-xs text-neutral-500'>{caption}</Text>
-            ) : null}
-        </View>
-    )
-}
+const styles = StyleSheet.create({
+  card: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  label: {
+    ...Typography.caption,
+    textTransform: "uppercase",
+    color: getNativeDefault("secondaryText"),
+  },
+  value: {
+    marginTop: 8,
+    ...Typography.titleBold,
+    color: getNativeDefault("text"),
+  },
+  caption: {
+    marginTop: 4,
+    ...Typography.caption,
+    color: getNativeDefault("secondaryText"),
+  },
+});

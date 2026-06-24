@@ -1,15 +1,14 @@
 import { useNotificationPermission } from "@/contexts/notification-permission-context";
+import { getNativeDefault } from "@/theme/colors";
 import { Entypo, Feather, FontAwesome } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
-import { Pressable, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const ACTIVE = "#FFFFFF";
-const INACTIVE = "#2F3238";
+const ACTIVE = getNativeDefault("text");
+const INACTIVE = getNativeDefault("secondaryText");
 const TAB_HEIGHT = 68;
-/** Side tabs — one size so Home / Profile match visually */
 const TAB_ICON_SIZE = 26;
-/** Center FAB — slightly larger, proportional to side icons */
 const FAB_ICON_SIZE = Math.round(TAB_ICON_SIZE * 1.35);
 
 export default function TabsLayout() {
@@ -20,7 +19,7 @@ export default function TabsLayout() {
   const bottomInset = Math.max(insets.bottom, 10);
 
   return (
-    <View className="flex-1 bg-[#111111]">
+    <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -28,27 +27,13 @@ export default function TabsLayout() {
           tabBarActiveTintColor: ACTIVE,
           tabBarInactiveTintColor: INACTIVE,
           tabBarStyle: {
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "#111111",
-            borderTopWidth: 0,
-            borderTopColor: "transparent",
-            borderRadius: 0,
+            ...styles.tabStyle,
             height: TAB_HEIGHT + bottomInset,
-            paddingTop: 8,
             paddingBottom: bottomInset,
-            paddingHorizontal: 0,
-            elevation: 0,
           },
-          tabBarItemStyle: {
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-          },
+          tabBarItemStyle: styles.tabItemStyle,
           tabBarIconStyle: { marginTop: 8 },
-          sceneStyle: { backgroundColor: "#111111" },
+          sceneStyle: { backgroundColor: getNativeDefault("background") },
         }}
       >
         <Tabs.Screen
@@ -65,17 +50,18 @@ export default function TabsLayout() {
           options={{
             title: "Add Subscription",
             tabBarButton: () => (
-              <View className="flex-1 items-center justify-center">
+              <View style={styles.NewSubContainer}>
                 <Pressable
                   onPress={() => router.push("/(home)/NewSubscription")}
                   accessibilityRole="button"
                   accessibilityLabel="Add subscription"
-                  className="-mt-9 h-[76px] w-[76px] items-center justify-center rounded-full bg-white"
-                  style={({ pressed }) =>
-                    pressed ? { opacity: 0.85 } : undefined
-                  }
+                  style={styles.addSubBtn}
                 >
-                  <Feather name="plus" size={FAB_ICON_SIZE} color="#111111" />
+                  <Feather
+                    name="plus"
+                    size={FAB_ICON_SIZE}
+                    color={getNativeDefault("background")}
+                  />
                 </Pressable>
               </View>
             ),
@@ -86,15 +72,11 @@ export default function TabsLayout() {
           options={{
             title: "Profile",
             tabBarIcon: ({ color }) => (
-              <View
-                className="items-center justify-center"
-                style={{ position: "relative" }}
-              >
+              <View style={styles.profileBtnContainer}>
                 <FontAwesome name="user" size={TAB_ICON_SIZE} color={color} />
                 {showEnableNotificationsCue ? (
                   <View
-                    className="absolute rounded-full border-2 border-[#111317] bg-red-500"
-                    style={{ width: 10, height: 10, top: 2, right: -4 }}
+                    style={styles.notificationDot}
                     accessibilityLabel="Notifications are off"
                   />
                 ) : null}
@@ -106,3 +88,54 @@ export default function TabsLayout() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tabStyle: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: getNativeDefault("background"),
+    borderTopWidth: 0,
+    borderTopColor: "transparent",
+    borderRadius: 0,
+    paddingTop: 8,
+    paddingHorizontal: 0,
+    elevation: 0,
+  },
+  tabItemStyle: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  NewSubContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addSubBtn: {
+    height: 76,
+    width: 76,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: getNativeDefault("text"),
+    marginTop: -36,
+  },
+  profileBtnContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  notificationDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: "red",
+    position: "absolute",
+    top: 2,
+    right: -4,
+    borderWidth: 2,
+    borderColor: getNativeDefault("background"),
+  },
+});

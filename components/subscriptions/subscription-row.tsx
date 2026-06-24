@@ -1,11 +1,12 @@
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
-import { Pressable, Switch, Text, View } from "react-native";
+import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import {
-    billingCycleLabel,
-    formatCurrency,
-    renewalCountdownLabel,
-    type Subscription,
+  billingCycleLabel,
+  formatCurrency,
+  renewalCountdownLabel,
+  type Subscription,
 } from "../../lib/subscriptions";
 import { SubscriptionLogo } from "./subscription-logo";
 
@@ -14,15 +15,10 @@ type Variant = "history" | "list";
 type Props = {
   subscription: Subscription;
   variant?: Variant;
-  /** When provided, shows a switch for toggling the active state. */
   onToggleActive?: (next: boolean) => void;
   onPress: () => void;
 };
 
-/**
- * A single subscription row used on the dashboard history list and the
- * "all subscriptions" screen.
- */
 export function SubscriptionRow({
   subscription,
   variant = "list",
@@ -42,55 +38,36 @@ export function SubscriptionRow({
         size={44}
       />
 
-      <View className="flex-1">
-        <Text className="font-inter-medium text-base text-white">
-          {subscription.name}
-        </Text>
-        <Text className="mt-0.5 text-sm text-neutral-500 font-inter">
-          {renewalLabel}
-        </Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.subscriptionName}>{subscription.name}</Text>
+        <Text style={styles.renewalLabel}>{renewalLabel}</Text>
       </View>
 
-      {variant === "list" ? (
-        <View className="items-end">
-          <Text className="font-inter-bold text-base text-white">
-            {formatCurrency(subscription.price, subscription.currency)}
-          </Text>
-          <Text className="mt-0.5 font-inter text-xs text-neutral-500">
-            {cycleLabel}
-          </Text>
-        </View>
-      ) : (
-        <View className="items-end">
-          <Text className="font-inter-bold text-base text-white">
-            -{formatCurrency(subscription.price, subscription.currency)}
-          </Text>
-          <Text className="mt-0.5 text-xs text-neutral-500 font-inter">
-            {cycleLabel}
-          </Text>
-        </View>
-      )}
+      <View style={{ alignItems: "flex-end" }}>
+        <Text style={styles.priceLabel}>
+          {formatCurrency(subscription.price, subscription.currency)}
+        </Text>
+        <Text style={styles.cycleLabel}>{cycleLabel}</Text>
+      </View>
     </>
   );
 
   if (variant === "list") {
     return (
-      <View className="flex-row items-center gap-4 rounded-2xl border border-[#1F1F22] bg-[#16161A] px-4 py-4">
+      <View style={styles.container}>
         <Pressable
           onPress={onPress}
-          className="min-w-0 flex-1 flex-row items-center gap-4"
-          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          style={styles.pressable}
           accessibilityRole="button"
           accessibilityLabel={`Edit ${subscription.name}`}
         >
           {rowBody}
         </Pressable>
-        <View className="ml-3 items-end justify-center">
+        <View style={styles.switchContainer}>
           {onToggleActive ? (
             <Switch
               value={subscription.active}
               onValueChange={onToggleActive}
-              trackColor={{ true: "#A3E635", false: "#27272A" }}
               thumbColor="#FFFFFF"
               ios_backgroundColor="#27272A"
             />
@@ -105,8 +82,7 @@ export function SubscriptionRow({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-4 rounded-2xl border border-[#1F1F22] bg-[#16161A] px-4 py-4"
-      style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+      style={styles.container}
       accessibilityRole="button"
       accessibilityLabel={`Edit ${subscription.name}`}
     >
@@ -114,3 +90,46 @@ export function SubscriptionRow({
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  switchContainer: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  pressable: {
+    flex: 1,
+    gap: 16,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  subscriptionName: {
+    ...Typography.bodyMedium,
+    color: getNativeDefault("text"),
+  },
+  renewalLabel: {
+    marginTop: 0.5,
+    color: getNativeDefault("secondaryText"),
+    ...Typography.caption,
+  },
+  priceLabel: {
+    color: getNativeDefault("text"),
+    ...Typography.bodyMedium,
+  },
+  cycleLabel: {
+    marginTop: 0.5,
+    color: getNativeDefault("secondaryText"),
+    ...Typography.caption,
+  },
+});

@@ -10,11 +10,11 @@ import {
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router } from "expo-router";
 
-export default function NotificationBellBtn() {
+export default function AddSubscriptionBtn() {
   return (
     <Host colorScheme="dark" matchContents>
       <Button
-        onPress={() => router.push("/(home)/notifications")}
+        onPress={() => router.push("/(home)/NewSubscription")}
         modifiers={[
           clipShape("circle"),
           buttonStyle(isLiquidGlassAvailable() ? "glass" : "bordered"),
@@ -22,7 +22,7 @@ export default function NotificationBellBtn() {
         ]}
       >
         <Image
-          systemName="bell"
+          systemName="plus"
           size={20}
           modifiers={[
             clipShape("circle"),

@@ -7,6 +7,7 @@ import {
   getCurrencyOption,
   SUPPORTED_CURRENCIES,
 } from "@/constants/currencies";
+import { getNativeDefault } from "@/theme/colors";
 import {
   Button,
   DatePicker,
@@ -23,6 +24,7 @@ import {
 } from "@expo/ui/swift-ui";
 import {
   autocorrectionDisabled,
+  background,
   buttonStyle,
   contentShape,
   datePickerStyle,
@@ -33,7 +35,6 @@ import {
   onTapGesture,
   opacity,
   pickerStyle,
-  scrollContentBackground,
   scrollIndicators,
   shapes,
   tag,
@@ -96,11 +97,11 @@ function NewSubscriptionForm() {
         </Stack.Toolbar.Button>
       </Stack.Toolbar>
 
-      <Host style={{ flex: 1, backgroundColor: "#111111" }} colorScheme="dark">
+      <Host style={{ flex: 1 }}>
         <Form
           modifiers={[
-            scrollContentBackground("hidden"),
             scrollIndicators("hidden"),
+            background(getNativeDefault("background")),
           ]}
         >
           <Section>

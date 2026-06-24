@@ -1,19 +1,28 @@
 import NotificationBellBtn from "@/components/NotificationBellBtn";
+import { SwipeableSubscriptionRow } from "@/components/subscriptions/swipeable-subscription-row";
 import { usePreferences } from "@/contexts/preferences-context";
 import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useConvertedSpendTotals } from "@/hooks/use-converted-totals";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { formatSpendLabelForPeriod } from "@/lib/spend-by-period";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { useUser } from "@clerk/expo";
 import { Feather } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useMemo, useRef } from "react";
-import { Alert, Animated, Pressable, Text, View } from "react-native";
+import {
+  Alert,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollRevealTopChrome } from "../../../components/scroll-reveal-top-chrome";
 import { DashboardSkeleton } from "../../../components/skeletons/dashboard-skeleton";
 import { StatCard } from "../../../components/subscriptions/stat-card";
-import { SwipeableSubscriptionRow } from "../../../components/subscriptions/swipeable-subscription-row";
 import { type Subscription } from "../../../lib/subscriptions";
 
 const TODAY_FORMATTER = new Intl.DateTimeFormat("en-US", {
@@ -120,9 +129,9 @@ export default function DashboardScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#111111]">
+    <View style={styles.container}>
       <Animated.ScrollView
-        className="flex-1"
+        style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: insets.top + 16,
           paddingHorizontal: 20,
@@ -134,66 +143,45 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-row items-center justify-between gap-3">
-          <View className="min-w-0 flex-1">
-            <Text className="font-inter text-sm text-neutral-500">
-              {todayLabel}
-            </Text>
-            <Text className="mt-1 font-inter-bold text-2xl text-white">
-              Hi, {greeting}
-            </Text>
+        <View style={styles.headerRow}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.todayLabel}>{todayLabel}</Text>
+            <Text style={styles.greetingText}>Hi, {greeting}</Text>
           </View>
           <NotificationBellBtn />
         </View>
 
-        {error ? (
-          <Text className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 font-inter text-sm text-red-300">
-            {error}
-          </Text>
-        ) : null}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <View className="rounded-3xl border border-[#1F1F22] bg-[#16161A] p-5">
-          <Text className="font-inter text-xs uppercase tracking-wider text-neutral-500">
-            This month
-          </Text>
-          <View className="mt-2 flex-row items-baseline gap-1">
-            <Text className="font-inter-bold text-5xl text-white">
-              {monthSpend}
-            </Text>
-            <Text className="font-inter-medium text-xl text-neutral-400">
-              /mo
-            </Text>
+        <View style={styles.mainCard}>
+          <Text style={styles.cardLabel}>This month</Text>
+          <View style={styles.cardSpendRow}>
+            <Text style={styles.cardSpendText}>{monthSpend}</Text>
+            <Text style={styles.cardSpendPeriod}>/mo</Text>
           </View>
         </View>
 
-        <View className="flex-row gap-3">
+        <View style={styles.statsRow}>
           <StatCard
             label="Active"
             value={String(activeCount)}
             caption="services"
           />
-          <StatCard
-            label="Per year"
-            value={yearSpend}
-            caption="at this pace"
-            accent="highlight"
-          />
+          <StatCard label="Per year" value={yearSpend} caption="at this pace" />
         </View>
 
-        <View className="gap-3">
-          <View className="flex-row items-center justify-between">
-            <Text className="font-inter-bold text-lg text-white">Upcoming</Text>
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Upcoming</Text>
             <Link href="/(home)/subscriptions" asChild>
               <Pressable hitSlop={8}>
-                <Text className="font-inter-medium text-sm text-neutral-400">
-                  Show all
-                </Text>
+                <Text style={styles.showAllText}>Show all</Text>
               </Pressable>
             </Link>
           </View>
-          <View className="gap-2.5">
+          <View style={styles.upcomingList}>
             {upcoming.length === 0 ? (
-              <Text className="rounded-2xl border border-[#1F1F22] bg-[#16161A] px-4 py-6 text-center font-inter text-sm text-neutral-500">
+              <Text style={styles.emptyText}>
                 No upcoming renewals. Add a subscription to see it here.
               </Text>
             ) : (
@@ -211,14 +199,15 @@ export default function DashboardScreen() {
         </View>
 
         <Pressable
-          onPress={() => router.push("/(home)/add-subscription")}
-          className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-[#3F3F46] bg-[#16161A] py-4"
-          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          onPress={() => router.push("/(home)/NewSubscription")}
+          style={styles.addButton}
         >
-          <Feather name="plus" size={18} color="#A3A3A3" />
-          <Text className="font-inter-medium text-sm text-neutral-400">
-            Add a subscription
-          </Text>
+          <Feather
+            name="plus"
+            size={18}
+            color={getNativeDefault("secondaryText")}
+          />
+          <Text style={styles.addButtonText}>Add a subscription</Text>
         </Pressable>
       </Animated.ScrollView>
 
@@ -226,3 +215,123 @@ export default function DashboardScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: getNativeDefault("background"),
+  },
+  scrollView: {
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  headerTextContainer: {
+    minWidth: 0,
+    flex: 1,
+  },
+  todayLabel: {
+    ...Typography.caption,
+    color: getNativeDefault("secondaryText"),
+  },
+  greetingText: {
+    marginTop: 4,
+    ...Typography.titleBold,
+    color: getNativeDefault("text"),
+  },
+  errorText: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.4)",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#FCA5A5",
+  },
+  mainCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    padding: 20,
+  },
+  cardLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 10,
+    lineHeight: 14,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    color: getNativeDefault("secondaryText"),
+  },
+  cardSpendRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
+  },
+  cardSpendText: {
+    ...Typography.h1Bold,
+    color: getNativeDefault("text"),
+  },
+  cardSpendPeriod: {
+    ...Typography.subheadingMedium,
+    color: getNativeDefault("secondaryText"),
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  sectionContainer: {
+    gap: 12,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  sectionTitle: {
+    ...Typography.subheadingBold,
+    color: getNativeDefault("text"),
+  },
+  showAllText: {
+    ...Typography.smallMedium,
+    color: getNativeDefault("secondaryText"),
+  },
+  upcomingList: {
+    gap: 10,
+  },
+  emptyText: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    textAlign: "center",
+    ...Typography.caption,
+    color: getNativeDefault("secondaryText"),
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingVertical: 16,
+  },
+  addButtonText: {
+    ...Typography.smallMedium,
+    color: getNativeDefault("secondaryText"),
+  },
+});
