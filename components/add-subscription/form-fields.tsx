@@ -1,51 +1,98 @@
-import { Feather } from '@expo/vector-icons'
-import React from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
+import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export function FieldLabel({
-    icon,
-    label,
+  icon,
+  label,
 }: {
-    icon: React.ComponentProps<typeof Feather>['name']
-    label: string
+  icon: React.ComponentProps<typeof Feather>["name"];
+  label: string;
 }) {
-    return (
-        <View className='flex-row items-center gap-2'>
-            <Feather name={icon} size={14} color='#71717A' />
-            <Text className='font-inter text-xs uppercase tracking-wider text-neutral-500'>
-                {label}
-            </Text>
-        </View>
-    )
+  return (
+    <View style={styles.labelContainer}>
+      <Feather
+        name={icon}
+        size={14}
+        color={getNativeDefault("secondaryText")}
+      />
+      <Text style={styles.labelText}>{label}</Text>
+    </View>
+  );
 }
 
 export function DetailRow({
-    icon,
-    title,
-    value,
-    onPress,
+  icon,
+  title,
+  value,
+  onPress,
 }: {
-    icon: React.ComponentProps<typeof Feather>['name']
-    title: string
-    value: string
-    onPress: () => void
+  icon: React.ComponentProps<typeof Feather>["name"];
+  title: string;
+  value: string;
+  onPress: () => void;
 }) {
-    return (
-        <Pressable
-            onPress={onPress}
-            className='flex-row items-center gap-3 px-4 py-4'
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-        >
-            <View className='h-9 w-9 items-center justify-center rounded-xl bg-[#1F1F22]'>
-                <Feather name={icon} size={16} color='#FFFFFF' />
-            </View>
-            <Text className='flex-1 font-inter-medium text-base text-white'>{title}</Text>
-            <Text className='font-inter text-sm text-neutral-400'>{value}</Text>
-            <Feather name='chevron-right' size={16} color='#52525B' />
-        </Pressable>
-    )
+  return (
+    <Pressable onPress={onPress} style={styles.rowContainer}>
+      <View style={styles.iconContainer}>
+        <Feather name={icon} size={16} color={getNativeDefault("text")} />
+      </View>
+      <Text style={styles.rowTitle}>{title}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
+      <Feather
+        name="chevron-right"
+        size={16}
+        color={getNativeDefault("secondaryText")}
+      />
+    </Pressable>
+  );
 }
 
 export function RowDivider() {
-    return <View className='ml-[64px] h-px bg-[#1F1F22]' />
+  return <View style={styles.divider} />;
 }
+
+const styles = StyleSheet.create({
+  labelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  labelText: {
+    ...Typography.caption,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    color: getNativeDefault("secondaryText"),
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  iconContainer: {
+    height: 36,
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  rowTitle: {
+    flex: 1,
+    ...Typography.bodyMedium,
+    color: getNativeDefault("text"),
+  },
+  rowValue: {
+    ...Typography.small,
+    color: getNativeDefault("secondaryText"),
+  },
+  divider: {
+    marginLeft: 64,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: getNativeDefault("separator"),
+  },
+});

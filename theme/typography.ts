@@ -120,6 +120,11 @@ export const Typography = {
   },
 
   // Medium weights
+  captionMedium: {
+    fontFamily: FontFamilies.medium,
+    fontSize: FontSizes.caption,
+    lineHeight: LineHeights.caption,
+  },
   smallMedium: {
     fontFamily: FontFamilies.medium,
     fontSize: FontSizes.small,

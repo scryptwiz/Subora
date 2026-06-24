@@ -1,46 +1,74 @@
-import { formatCurrency } from '@/lib/subscriptions'
-import React from 'react'
-import { ActivityIndicator, Pressable, Text } from 'react-native'
+import { formatCurrency } from "@/lib/subscriptions";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 
 type SaveSubscriptionButtonProps = {
-    isValid: boolean
-    saving: boolean
-    isEditing: boolean
-    priceNumber: number
-    currency: string
-    cycle: string
-    onPress: () => void
-}
+  isValid: boolean;
+  saving: boolean;
+  isEditing: boolean;
+  priceNumber: number;
+  currency: string;
+  cycle: string;
+  onPress: () => void;
+};
 
 export function SaveSubscriptionButton({
-    isValid,
-    saving,
-    isEditing,
-    priceNumber,
-    currency,
-    cycle,
-    onPress,
+  isValid,
+  saving,
+  isEditing,
+  priceNumber,
+  currency,
+  cycle,
+  onPress,
 }: SaveSubscriptionButtonProps) {
-    return (
-        <Pressable
-            onPress={onPress}
-            disabled={!isValid || saving}
-            className={`h-16 items-center justify-center rounded-2xl ${isValid && !saving ? 'bg-white' : 'bg-white/20'}`}
-            style={({ pressed }) => (pressed && isValid && !saving ? { opacity: 0.85 } : undefined)}
-        >
-            {saving ? (
-                <ActivityIndicator color='#111111' />
-            ) : (
-                <Text className={`font-inter-medium text-lg ${isValid ? 'text-[#111111]' : 'text-neutral-500'}`}>
-                    {isValid
-                        ? isEditing
-                            ? `Save · ${formatCurrency(priceNumber, currency)} / ${cycle}`
-                            : `Add ${formatCurrency(priceNumber, currency)} / ${cycle}`
-                        : isEditing
-                          ? 'Save changes'
-                          : 'Add subscription'}
-                </Text>
-            )}
-        </Pressable>
-    )
+  const active = isValid && !saving;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={!active}
+      style={[
+        styles.button,
+        active ? styles.buttonValid : styles.buttonInvalid,
+      ]}
+    >
+      {saving ? (
+        <ActivityIndicator color={getNativeDefault("background")} />
+      ) : (
+        <Text style={active ? styles.textActive : styles.textInactive}>
+          {isValid
+            ? isEditing
+              ? `Save · ${formatCurrency(priceNumber, currency)} / ${cycle}`
+              : `Add ${formatCurrency(priceNumber, currency)} / ${cycle}`
+            : isEditing
+              ? "Save changes"
+              : "Add subscription"}
+        </Text>
+      )}
+    </Pressable>
+  );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    height: 64,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+  },
+  buttonValid: {
+    backgroundColor: getNativeDefault("text"),
+  },
+  buttonInvalid: {
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  textActive: {
+    ...Typography.subheadingMedium,
+    color: getNativeDefault("background"),
+  },
+  textInactive: {
+    ...Typography.subheadingMedium,
+    color: getNativeDefault("secondaryText"),
+  },
+});

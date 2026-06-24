@@ -1,44 +1,82 @@
-import { Feather } from '@expo/vector-icons'
-import React from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
+import { Feather } from "@expo/vector-icons";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 type AddSubscriptionHeaderProps = {
-    isEditing: boolean
-    isValid: boolean
-    saving: boolean
-    onClose: () => void
-    onSave: () => void
-}
+  isEditing: boolean;
+  isValid: boolean;
+  saving: boolean;
+  onClose: () => void;
+  onSave: () => void;
+};
 
 export function AddSubscriptionHeader({
-    isEditing,
-    isValid,
-    saving,
-    onClose,
-    onSave,
+  isEditing,
+  isValid,
+  saving,
+  onClose,
+  onSave,
 }: AddSubscriptionHeaderProps) {
-    return (
-        <View className='flex-row items-center justify-between'>
-            <Pressable
-                onPress={onClose}
-                accessibilityLabel='Close'
-                className='h-10 w-10 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]'
-                style={({ pressed }) => (pressed ? { opacity: 0.8 } : undefined)}
-            >
-                <Feather name='x' size={18} color='#FFFFFF' />
-            </Pressable>
-            <Text className='font-inter-medium text-base text-white'>
-                {isEditing ? 'Edit subscription' : 'New subscription'}
-            </Text>
-            <Pressable onPress={onSave} disabled={!isValid || saving} hitSlop={8}>
-                {saving ? (
-                    <ActivityIndicator color='#FFFFFF' size='small' />
-                ) : (
-                    <Text className={`font-inter-medium text-sm ${isValid ? 'text-white' : 'text-neutral-600'}`}>
-                        Save
-                    </Text>
-                )}
-            </Pressable>
-        </View>
-    )
+  return (
+    <View style={styles.headerContainer}>
+      <Pressable
+        onPress={onClose}
+        accessibilityLabel="Close"
+        style={styles.backButton}
+      >
+        <Feather name="x" size={18} color={getNativeDefault("secondaryText")} />
+      </Pressable>
+      <Text style={styles.headerTitle}>
+        {isEditing ? "Edit subscription" : "New subscription"}
+      </Text>
+      <Pressable onPress={onSave} disabled={!isValid || saving} hitSlop={8}>
+        {saving ? (
+          <ActivityIndicator
+            color={getNativeDefault("secondaryText")}
+            size="small"
+          />
+        ) : (
+          <Text
+            style={{
+              color: isValid
+                ? getNativeDefault("text")
+                : getNativeDefault("secondaryText"),
+              ...Typography.smallMedium,
+            }}
+          >
+            Save
+          </Text>
+        )}
+      </Pressable>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  headerTitle: {
+    ...Typography.bodyBold,
+    color: getNativeDefault("text"),
+  },
+});

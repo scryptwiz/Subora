@@ -11,6 +11,8 @@ import { PriceAndCycleFields } from "@/components/add-subscription/price-and-cyc
 import { SaveSubscriptionButton } from "@/components/add-subscription/save-subscription-button";
 import { formatBillingDate } from "@/lib/billing-date";
 import { searchPresets } from "@/lib/subscriptions";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -18,6 +20,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
@@ -64,10 +67,10 @@ function AddSubscriptionScreenInner() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      className="flex-1 bg-[#111111]"
+      style={styles.container}
     >
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: 24,
           paddingHorizontal: 20,
@@ -87,27 +90,27 @@ function AddSubscriptionScreenInner() {
         {!isEditing ? (
           <Pressable
             onPress={() => router.push("/(home)/import-subscriptions-from-pdf")}
-            className="rounded-2xl border border-[#3F3F46] bg-[#18181B] px-4 py-3 active:opacity-80"
+            style={styles.importButton}
           >
-            <Text className="font-inter text-sm font-semibold text-white">
+            <Text style={styles.importTitle}>
               Import from PDF (receipt or statement)
             </Text>
-            <Text className="mt-1 font-inter text-xs leading-4 text-[#A1A1AA]">
+            <Text style={styles.importSubtitle}>
               Subora does not store the file.
             </Text>
           </Pressable>
         ) : null}
         <BrandPreviewCard onPressLogo={() => setEmojiPickerOpen(true)} />
-        <View className="gap-3">
+        <View style={{ gap: 12 }}>
           <FieldLabel icon="tag" label="Service" />
           <TextInput
             value={name}
             onChangeText={clearLogoIfNameEdited}
             placeholder="e.g. Netflix"
-            placeholderTextColor="#52525B"
+            placeholderTextColor={getNativeDefault("secondaryText")}
             autoCapitalize="words"
             autoCorrect={false}
-            className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+            style={styles.textInput}
             returnKeyType="next"
             onSubmitEditing={() => priceRef.current?.focus()}
           />
@@ -128,11 +131,11 @@ function AddSubscriptionScreenInner() {
             value={domainInput}
             onChangeText={setDomainInput}
             placeholder={effectiveDomain ?? "netflix.com"}
-            placeholderTextColor="#52525B"
+            placeholderTextColor={getNativeDefault("secondaryText")}
             keyboardType={Platform.OS === "ios" ? "url" : "default"}
             autoCapitalize="none"
             autoCorrect={false}
-            className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+            style={styles.textInput}
           />
         </View>
 
@@ -176,3 +179,37 @@ export default function AddSubscriptionScreen() {
     </BrandPreviewProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: getNativeDefault("background"),
+  },
+  importButton: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  importTitle: {
+    ...Typography.smallBold,
+    color: getNativeDefault("text"),
+  },
+  importSubtitle: {
+    ...Typography.caption,
+    marginTop: 4,
+    color: getNativeDefault("secondaryText"),
+  },
+  textInput: {
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingHorizontal: 16,
+    color: getNativeDefault("text"),
+    ...Typography.body,
+  },
+});

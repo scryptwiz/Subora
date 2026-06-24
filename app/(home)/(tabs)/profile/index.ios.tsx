@@ -1,6 +1,7 @@
 import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
+import { getNativeDefault } from "@/theme/colors";
 import { useUser } from "@clerk/expo";
 import {
   Button,
@@ -14,6 +15,7 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import {
+  background,
   buttonStyle,
   font,
   foregroundStyle,
@@ -22,10 +24,10 @@ import {
   listRowBackground,
   padding,
   resizable,
-  scrollContentBackground,
   scrollIndicators,
 } from "@expo/ui/swift-ui/modifiers";
 import Constants from "expo-constants";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -50,19 +52,19 @@ export default function ProfileScreenIOS() {
       options={{
         headerShown: true,
         headerLargeTitle: true,
-        headerTransparent: true,
-        headerTintColor: "#FFFFFF",
+        headerTransparent: isLiquidGlassAvailable(),
+        headerTintColor: getNativeDefault("text"),
         title: "Settings",
-        contentStyle: { backgroundColor: "#111111" },
+        contentStyle: { backgroundColor: getNativeDefault("background") },
       }}
     >
       <>
-        <Host style={{ flex: 1 }} colorScheme="dark">
+        <Host style={{ flex: 1 }}>
           <Form
             modifiers={[
-              scrollContentBackground("hidden"),
               scrollIndicators("hidden"),
               padding({ bottom: insets.bottom }),
+              background(getNativeDefault("background")),
             ]}
           >
             {/* Profile Card Section */}

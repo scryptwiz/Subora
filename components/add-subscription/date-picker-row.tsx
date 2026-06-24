@@ -1,20 +1,29 @@
-import { Feather } from '@expo/vector-icons'
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
+import { Feather } from "@expo/vector-icons";
 import DateTimePicker, {
-    DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker'
-import React, { useState } from 'react'
-import { Modal, Platform, Pressable, Text, View } from 'react-native'
-import { DetailRow } from './form-fields'
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import {
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { DetailRow } from "./form-fields";
 
 type Props = {
-    icon: React.ComponentProps<typeof Feather>['name']
-    title: string
-    value: Date
-    onChange: (date: Date) => void
-    formatValue: (date: Date) => string
-    minimumDate?: Date
-    maximumDate?: Date
-}
+  icon: React.ComponentProps<typeof Feather>["name"];
+  title: string;
+  value: Date;
+  onChange: (date: Date) => void;
+  formatValue: (date: Date) => string;
+  minimumDate?: Date;
+  maximumDate?: Date;
+};
 
 /**
  * Native date picker styled to match the billing details rows. Android uses
@@ -23,95 +32,133 @@ type Props = {
  * the Expo Router modal screen this component is rendered inside.
  */
 export function DatePickerRow({
-    icon,
-    title,
-    value,
-    onChange,
-    formatValue,
-    minimumDate,
-    maximumDate,
+  icon,
+  title,
+  value,
+  onChange,
+  formatValue,
+  minimumDate,
+  maximumDate,
 }: Props) {
-    const [iosOpen, setIosOpen] = useState(false)
-    const [draft, setDraft] = useState<Date>(value)
+  const [iosOpen, setIosOpen] = useState(false);
+  const [draft, setDraft] = useState<Date>(value);
 
-    const openPicker = () => {
-        if (Platform.OS === 'android') {
-            DateTimePickerAndroid.open({
-                value,
-                mode: 'date',
-                minimumDate,
-                maximumDate,
-                onChange: (event, selected) => {
-                    if (event.type === 'set' && selected) {
-                        onChange(selected)
-                    }
-                },
-            })
-            return
-        }
-
-        setDraft(value)
-        setIosOpen(true)
+  const openPicker = () => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value,
+        mode: "date",
+        minimumDate,
+        maximumDate,
+        onChange: (event, selected) => {
+          if (event.type === "set" && selected) {
+            onChange(selected);
+          }
+        },
+      });
+      return;
     }
 
-    const confirm = () => {
-        onChange(draft)
-        setIosOpen(false)
-    }
+    setDraft(value);
+    setIosOpen(true);
+  };
 
-    return (
-        <>
-            <DetailRow
-                icon={icon}
-                title={title}
-                value={formatValue(value)}
-                onPress={openPicker}
+  const confirm = () => {
+    onChange(draft);
+    setIosOpen(false);
+  };
+
+  return (
+    <>
+      <DetailRow
+        icon={icon}
+        title={title}
+        value={formatValue(value)}
+        onPress={openPicker}
+      />
+
+      <Modal
+        visible={iosOpen}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        statusBarTranslucent
+        onRequestClose={() => setIosOpen(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Pressable
+            style={styles.backdrop}
+            onPress={() => setIosOpen(false)}
+          />
+          <View style={styles.pickerWrapper}>
+            <View style={styles.header}>
+              <Pressable hitSlop={8} onPress={() => setIosOpen(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </Pressable>
+              <Text style={styles.titleText}>{title}</Text>
+              <Pressable hitSlop={8} onPress={confirm}>
+                <Text style={styles.confirmText}>Done</Text>
+              </Pressable>
+            </View>
+            <DateTimePicker
+              value={draft}
+              mode="date"
+              display="spinner"
+              themeVariant="dark"
+              minimumDate={minimumDate}
+              maximumDate={maximumDate}
+              onChange={(_, selected) => {
+                if (selected) setDraft(selected);
+              }}
+              style={styles.datePicker}
             />
-
-            <Modal
-                visible={iosOpen}
-                transparent
-                animationType='fade'
-                presentationStyle='overFullScreen'
-                statusBarTranslucent
-                onRequestClose={() => setIosOpen(false)}
-            >
-                <View className='flex-1 justify-end'>
-                    <Pressable
-                        className='absolute inset-0 bg-black/55'
-                        onPress={() => setIosOpen(false)}
-                    />
-                    <View className='border-t border-[#27272A] bg-[#16161A] pb-8 pt-3'>
-                        <View className='flex-row items-center justify-between px-5 pb-2'>
-                            <Pressable hitSlop={8} onPress={() => setIosOpen(false)}>
-                                <Text className='font-inter-medium text-sm text-neutral-400'>
-                                    Cancel
-                                </Text>
-                            </Pressable>
-                            <Text className='font-inter-medium text-sm text-white'>
-                                {title}
-                            </Text>
-                            <Pressable hitSlop={8} onPress={confirm}>
-                                <Text className='font-inter-medium text-sm text-lime-400'>
-                                    Done
-                                </Text>
-                            </Pressable>
-                        </View>
-                        <DateTimePicker
-                            value={draft}
-                            mode='date'
-                            display='spinner'
-                            themeVariant='dark'
-                            minimumDate={minimumDate}
-                            maximumDate={maximumDate}
-                            onChange={(_, selected) => {
-                                if (selected) setDraft(selected)
-                            }}
-                            className='bg-[#16161A]'
-                        />
-                    </View>
-                </View>
-            </Modal>
-        </>
-    )
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+  },
+  pickerWrapper: {
+    borderTopWidth: 1,
+    borderTopColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingBottom: 32,
+    paddingTop: 12,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  cancelText: {
+    ...Typography.smallMedium,
+    color: getNativeDefault("secondaryText"),
+  },
+  titleText: {
+    ...Typography.smallMedium,
+    color: getNativeDefault("text"),
+  },
+  confirmText: {
+    ...Typography.smallMedium,
+    color: getNativeDefault("link"),
+  },
+  datePicker: {
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+});

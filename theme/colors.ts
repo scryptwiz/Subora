@@ -23,8 +23,8 @@ export function getNativeDefault(key: SystemColorKey): ColorValue {
     },
     android: {
       background: Color.android.dynamic.surfaceContainer,
-      secondaryBackground: Color.android.dynamic.surfaceContainer,
-      tertiaryBackground: Color.ios.tertiarySystemBackground,
+      secondaryBackground: Color.android.dynamic.surfaceContainerHigh,
+      tertiaryBackground: Color.android.dynamic.surfaceContainerLow,
       text: Color.android.dynamic.onSurface,
       secondaryText: Color.android.dynamic.onSurfaceVariant,
       separator: Color.android.dynamic.outlineVariant,
