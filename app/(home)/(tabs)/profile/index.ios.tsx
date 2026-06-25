@@ -1,4 +1,3 @@
-import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { getNativeDefault } from "@/theme/colors";
@@ -17,6 +16,7 @@ import {
 import {
   background,
   buttonStyle,
+  clipShape,
   font,
   foregroundStyle,
   frame,
@@ -28,6 +28,7 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import Constants from "expo-constants";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { Image as ExpoImage } from "expo-image";
 import { router, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -63,28 +64,35 @@ export default function ProfileScreenIOS() {
           <Form
             modifiers={[
               scrollIndicators("hidden"),
-              padding({ bottom: insets.bottom }),
+              padding({ bottom: isLiquidGlassAvailable() ? 0 : insets.bottom }),
               background(getNativeDefault("background")),
             ]}
           >
             {/* Profile Card Section */}
             <Section>
               <HStack alignment="center" spacing={18}>
-                {/* {user?.imageUrl ? (
-                <ExpoImage
-                  source={{ uri: user.imageUrl }}
-                  style={{ width: 88, height: 88, borderRadius: 44 }}
-                />
-              ) : ( */}
-                <SwiftUIImage
-                  systemName="person.crop.circle.fill"
-                  modifiers={[
-                    foregroundStyle("#3F3F46"),
-                    resizable(),
-                    frame({ width: 60, height: 60 }),
-                  ]}
-                />
-                {/* )} */}
+                {user?.imageUrl ? (
+                  <VStack
+                    modifiers={[
+                      frame({ width: 60, height: 60 }),
+                      clipShape("circle"),
+                    ]}
+                  >
+                    <ExpoImage
+                      source={{ uri: user.imageUrl }}
+                      style={{ width: 60, height: 60 }}
+                    />
+                  </VStack>
+                ) : (
+                  <SwiftUIImage
+                    systemName="person.crop.circle.fill"
+                    modifiers={[
+                      foregroundStyle("#3F3F46"),
+                      resizable(),
+                      frame({ width: 60, height: 60 }),
+                    ]}
+                  />
+                )}
                 <VStack alignment="leading" spacing={4}>
                   <Text modifiers={[font({ size: 20, weight: "bold" })]}>
                     {displayName}
@@ -242,7 +250,10 @@ export default function ProfileScreenIOS() {
 
             {/* Footer Version Section */}
             <Section
-              modifiers={[listRowBackground("clear"), padding({ bottom: 52 })]}
+              modifiers={[
+                listRowBackground("clear"),
+                padding({ bottom: isLiquidGlassAvailable() ? 0 : 52 }),
+              ]}
             >
               <HStack>
                 <Spacer />
@@ -256,7 +267,7 @@ export default function ProfileScreenIOS() {
             </Section>
           </Form>
         </Host>
-        <DeleteAccountModal
+        {/* <DeleteAccountModal
           visible={deleteOpen}
           email={user?.primaryEmailAddress?.emailAddress ?? undefined}
           deleting={deleting}
@@ -266,7 +277,7 @@ export default function ProfileScreenIOS() {
             setDeleteOpen(false);
           }}
           onConfirm={() => void handleDeleteAccount()}
-        />
+        /> */}
       </>
     </Stack.Screen>
   );
