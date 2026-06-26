@@ -8,8 +8,8 @@ import { SettingsRow } from "@/components/settings/SettingsRow";
 import { SectionCard } from "@/components/settings/SettingsSectionCard";
 import { getCurrencyOption } from "@/constants/currencies";
 import { usePreferences } from "@/contexts/preferences-context";
+import { useFunAvatar } from "@/hooks/use-fun-avatar";
 import { useProfileActions } from "@/hooks/use-profile-actions";
-import { avatarColor, initials } from "@/lib/logo";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { useUser } from "@clerk/expo";
 import Constants from "expo-constants";
@@ -23,6 +23,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useUser();
+  const funAvatarUrl = useFunAvatar();
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const onScroll = Animated.event(
@@ -85,7 +86,7 @@ export default function ProfileScreen() {
         >
           {/* Profile card */}
           <View className="items-center gap-3 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6">
-            {user?.imageUrl ? (
+            {/* {user?.imageUrl ? (
               <Image
                 key={user.imageUrl}
                 source={{ uri: user.imageUrl }}
@@ -102,7 +103,14 @@ export default function ProfileScreen() {
                   {initials(displayName)}
                 </Text>
               </View>
-            )}
+            )} */}
+            <Image
+              key={funAvatarUrl}
+              source={{ uri: funAvatarUrl }}
+              style={{ width: 88, height: 88, borderRadius: 44 }}
+              contentFit="cover"
+              recyclingKey={funAvatarUrl}
+            />
             <View className="items-center">
               <Text className="font-inter-bold text-xl text-white">
                 {displayName}

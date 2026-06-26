@@ -1,3 +1,4 @@
+import { useFunAvatar } from "@/hooks/use-fun-avatar";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { getNativeDefault } from "@/theme/colors";
@@ -16,14 +17,13 @@ import {
 import {
   background,
   buttonStyle,
-  clipShape,
+  cornerRadius,
   font,
   foregroundStyle,
   frame,
   imageScale,
   listRowBackground,
   padding,
-  resizable,
   scrollIndicators,
 } from "@expo/ui/swift-ui/modifiers";
 import Constants from "expo-constants";
@@ -35,6 +35,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function ProfileScreenIOS() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
+  const funAvatarUrl = useFunAvatar();
 
   const displayName = profileDisplayName(user);
   const email = user?.primaryEmailAddress?.emailAddress ?? "—";
@@ -70,99 +71,131 @@ export default function ProfileScreenIOS() {
           >
             {/* Profile Card Section */}
             <Section>
-              <HStack alignment="center" spacing={18}>
-                {user?.imageUrl ? (
-                  <VStack
+              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
+                <HStack alignment="center" spacing={16}>
+                  {/* {user?.imageUrl ? (
+                    <HStack
+                      modifiers={[
+                        frame({ width: 60, height: 60 }),
+                        cornerRadius(100),
+                      ]}
+                    >
+                      <ExpoImage
+                        source={{ uri: user.imageUrl }}
+                        style={{ width: 60, height: 60 }}
+                        contentFit="fill"
+                      />
+                    </HStack>
+                  ) : (
+                    <SwiftUIImage
+                      systemName="person.crop.circle.fill"
+                      modifiers={[
+                        foregroundStyle("#3F3F46"),
+                        resizable(),
+                        frame({ width: 60, height: 60 }),
+                      ]}
+                    />
+                  )} */}
+                  <HStack
                     modifiers={[
                       frame({ width: 60, height: 60 }),
-                      clipShape("circle"),
+                      cornerRadius(100),
                     ]}
                   >
                     <ExpoImage
-                      source={{ uri: user.imageUrl }}
+                      source={{ uri: funAvatarUrl }}
                       style={{ width: 60, height: 60 }}
+                      contentFit="fill"
                     />
+                  </HStack>
+                  <VStack alignment="leading" spacing={2}>
+                    <Text modifiers={[font({ size: 22, weight: "bold" })]}>
+                      {displayName}
+                    </Text>
+                    <Text
+                      modifiers={[
+                        foregroundStyle(getNativeDefault("secondaryText")),
+                      ]}
+                    >
+                      {email}
+                    </Text>
                   </VStack>
-                ) : (
+                  <Spacer />
                   <SwiftUIImage
-                    systemName="person.crop.circle.fill"
+                    systemName="chevron.right"
+                    size={16}
                     modifiers={[
-                      foregroundStyle("#3F3F46"),
-                      resizable(),
-                      frame({ width: 60, height: 60 }),
-                    ]}
-                  />
-                )}
-                <VStack alignment="leading" spacing={4}>
-                  <Text modifiers={[font({ size: 20, weight: "bold" })]}>
-                    {displayName}
-                  </Text>
-                  <Text
-                    modifiers={[font({ size: 14 }), foregroundStyle("#A1A1AA")]}
-                  >
-                    {email}
-                  </Text>
-                </VStack>
-              </HStack>
-            </Section>
-
-            {/* Account Section */}
-            <Section>
-              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
-                <HStack spacing={12}>
-                  <SwiftUIImage
-                    systemName="person.crop.circle"
-                    modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
-                  <Text>Edit profile</Text>
                 </HStack>
               </Button>
 
-              <Button
-                onPress={() => router.push("/(home)/notifications")}
-                modifiers={[buttonStyle("plain")]}
-              >
+              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack spacing={12}>
+                  <Text>Currency</Text>
+                  <Spacer />
                   <SwiftUIImage
-                    systemName="bell"
+                    systemName="chevron.right"
+                    size={16}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
-                  <Text>Reminders</Text>
                 </HStack>
               </Button>
             </Section>
 
             {/* Preferences Section */}
             <Section>
-              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
+              <Button
+                onPress={() => router.push("/(home)/notifications")}
+                modifiers={[buttonStyle("plain")]}
+              >
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="dollarsign.circle"
+                    systemName="bell.badge.fill"
+                    size={28}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
-                  <Text>Currency</Text>
+                  <Text>Reminders</Text>
+                  <Spacer />
+                  <SwiftUIImage
+                    systemName="chevron.right"
+                    size={16}
+                    modifiers={[
+                      foregroundStyle(getNativeDefault("secondaryText")),
+                      imageScale("small"),
+                    ]}
+                  />
                 </HStack>
               </Button>
 
               <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="arrow.down.doc"
+                    systemName="arrow.down.doc.fill"
+                    size={28}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
                   <Text>Export data</Text>
+                  <Spacer />
+                  <SwiftUIImage
+                    systemName="chevron.right"
+                    size={16}
+                    modifiers={[
+                      foregroundStyle(getNativeDefault("secondaryText")),
+                      imageScale("small"),
+                    ]}
+                  />
                 </HStack>
               </Button>
             </Section>
@@ -172,39 +205,69 @@ export default function ProfileScreenIOS() {
               <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="questionmark.circle"
+                    systemName="questionmark.circle.fill"
+                    size={28}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
                   <Text>Help center</Text>
+                  <Spacer />
+                  <SwiftUIImage
+                    systemName="chevron.right"
+                    size={16}
+                    modifiers={[
+                      foregroundStyle(getNativeDefault("secondaryText")),
+                      imageScale("small"),
+                    ]}
+                  />
                 </HStack>
               </Button>
 
               <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="shield"
+                    systemName="shield.lefthalf.filled"
+                    size={28}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
                   <Text>Privacy policy</Text>
+                  <Spacer />
+                  <SwiftUIImage
+                    systemName="chevron.right"
+                    size={16}
+                    modifiers={[
+                      foregroundStyle(getNativeDefault("secondaryText")),
+                      imageScale("small"),
+                    ]}
+                  />
                 </HStack>
               </Button>
 
               <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="doc.text"
+                    systemName="doc.text.fill"
+                    size={28}
                     modifiers={[
-                      foregroundStyle("#A1A1AA"),
+                      foregroundStyle(getNativeDefault("secondaryText")),
                       imageScale("small"),
                     ]}
                   />
                   <Text>Terms of service</Text>
+                  <Spacer />
+                  <SwiftUIImage
+                    systemName="chevron.right"
+                    size={16}
+                    modifiers={[
+                      foregroundStyle(getNativeDefault("secondaryText")),
+                      imageScale("small"),
+                    ]}
+                  />
                 </HStack>
               </Button>
             </Section>
@@ -217,7 +280,8 @@ export default function ProfileScreenIOS() {
               >
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="arrow.right.to.line"
+                    systemName="arrow.right.to.line.compact"
+                    size={28}
                     modifiers={[
                       foregroundStyle("#EF4444"),
                       imageScale("small"),
@@ -235,7 +299,8 @@ export default function ProfileScreenIOS() {
               >
                 <HStack spacing={12}>
                   <SwiftUIImage
-                    systemName="trash"
+                    systemName="trash.fill"
+                    size={28}
                     modifiers={[
                       foregroundStyle("#EF4444"),
                       imageScale("small"),

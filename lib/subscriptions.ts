@@ -248,8 +248,7 @@ export function totalYearly(
   return subs
     .filter((s) => s.active)
     .reduce(
-      (sum, s) =>
-        sum + (s.billingCycle === "year" ? s.price : s.price * 12),
+      (sum, s) => sum + (s.billingCycle === "year" ? s.price : s.price * 12),
       0,
     );
 }
@@ -277,7 +276,7 @@ export function renewalCountdownLabel(iso: string, now = new Date()): string {
 
   if (days <= 0) return "Renewal today";
   if (days === 1) return "Renewal tomorrow";
-  if (days < 7) return `Renewal in ${days} days`;
+  if (days < 7) return `In ${days} days`;
 
   const formatter = new Intl.DateTimeFormat("en-US", {
     month: "short",

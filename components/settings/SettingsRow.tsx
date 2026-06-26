@@ -39,7 +39,9 @@ export function SettingsRow({
           </Text>
         ) : null}
       </View>
-      <Feather name="chevron-right" size={18} color="#52525B" />
+      {!danger ? (
+        <Feather name="chevron-right" size={18} color="#52525B" />
+      ) : null}
     </Pressable>
   );
 }
