@@ -2,6 +2,7 @@ import { CurrencyPickerModal } from "@/components/profile/currency-picker-modal"
 import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
 import { EditProfileModal } from "@/components/profile/edit-profile-modal";
 import { ExportDataModal } from "@/components/profile/export-data-modal";
+import ProfileImage from "@/components/profile/ProfileImage";
 import { PushNotificationPromptSection } from "@/components/profile/push-notification-prompt-section";
 import { ScrollRevealTopChrome } from "@/components/scroll-reveal-top-chrome";
 import { SettingsRow } from "@/components/settings/SettingsRow";
@@ -13,7 +14,6 @@ import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { useUser } from "@clerk/expo";
 import Constants from "expo-constants";
-import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Alert, Animated, Text, View } from "react-native";
@@ -86,31 +86,7 @@ export default function ProfileScreen() {
         >
           {/* Profile card */}
           <View className="items-center gap-3 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6">
-            {/* {user?.imageUrl ? (
-              <Image
-                key={user.imageUrl}
-                source={{ uri: user.imageUrl }}
-                style={{ width: 88, height: 88, borderRadius: 44 }}
-                contentFit="cover"
-                recyclingKey={user.imageUrl}
-              />
-            ) : (
-              <View
-                className="h-[88px] w-[88px] items-center justify-center rounded-full"
-                style={{ backgroundColor: avatarColor(displayName) }}
-              >
-                <Text className="font-inter-bold text-3xl text-white">
-                  {initials(displayName)}
-                </Text>
-              </View>
-            )} */}
-            <Image
-              key={funAvatarUrl}
-              source={{ uri: funAvatarUrl }}
-              style={{ width: 88, height: 88, borderRadius: 44 }}
-              contentFit="cover"
-              recyclingKey={funAvatarUrl}
-            />
+            <ProfileImage />
             <View className="items-center">
               <Text className="font-inter-bold text-xl text-white">
                 {displayName}

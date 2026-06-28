@@ -1,4 +1,4 @@
-import { useFunAvatar } from "@/hooks/use-fun-avatar";
+import ProfileImage from "@/components/profile/ProfileImage";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { getNativeDefault } from "@/theme/colors";
@@ -28,14 +28,12 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import Constants from "expo-constants";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Image as ExpoImage } from "expo-image";
 import { router, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreenIOS() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
-  const funAvatarUrl = useFunAvatar();
 
   const displayName = profileDisplayName(user);
   const email = user?.primaryEmailAddress?.emailAddress ?? "—";
@@ -73,40 +71,13 @@ export default function ProfileScreenIOS() {
             <Section>
               <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
                 <HStack alignment="center" spacing={16}>
-                  {/* {user?.imageUrl ? (
-                    <HStack
-                      modifiers={[
-                        frame({ width: 60, height: 60 }),
-                        cornerRadius(100),
-                      ]}
-                    >
-                      <ExpoImage
-                        source={{ uri: user.imageUrl }}
-                        style={{ width: 60, height: 60 }}
-                        contentFit="fill"
-                      />
-                    </HStack>
-                  ) : (
-                    <SwiftUIImage
-                      systemName="person.crop.circle.fill"
-                      modifiers={[
-                        foregroundStyle("#3F3F46"),
-                        resizable(),
-                        frame({ width: 60, height: 60 }),
-                      ]}
-                    />
-                  )} */}
                   <HStack
                     modifiers={[
                       frame({ width: 60, height: 60 }),
                       cornerRadius(100),
                     ]}
                   >
-                    <ExpoImage
-                      source={{ uri: funAvatarUrl }}
-                      style={{ width: 60, height: 60 }}
-                      contentFit="fill"
-                    />
+                    <ProfileImage />
                   </HStack>
                   <VStack alignment="leading" spacing={2}>
                     <Text modifiers={[font({ size: 22, weight: "bold" })]}>
