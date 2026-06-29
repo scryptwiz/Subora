@@ -67,7 +67,11 @@ export default function NotificationsScreen() {
           hitSlop={12}
           style={styles.backButton}
         >
-          <Feather name="arrow-left" size={22} color="#FFFFFF" />
+          <Feather
+            name="arrow-left"
+            size={22}
+            color={getNativeDefault("text")}
+          />
         </Pressable>
         <Text style={styles.headerText}>Notifications</Text>
       </View>

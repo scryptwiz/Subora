@@ -11,11 +11,13 @@ import { getCurrencyOption } from "@/constants/currencies";
 import { usePreferences } from "@/contexts/preferences-context";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { useUser } from "@clerk/expo";
 import Constants from "expo-constants";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Animated, Text, View } from "react-native";
+import { Alert, Animated, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
@@ -68,9 +70,9 @@ export default function ProfileScreen() {
         contentStyle: { backgroundColor: "#111111" },
       }}
     >
-      <View className="flex-1 bg-[#111111]">
+      <View style={styles.container}>
         <Animated.ScrollView
-          className="flex-1"
+          style={styles.scrollView}
           contentContainerStyle={{
             paddingTop: insets.top + 16,
             paddingHorizontal: 20,
@@ -83,25 +85,19 @@ export default function ProfileScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Profile card */}
-          <View className="items-center gap-3 rounded-3xl border border-[#1F1F22] bg-[#16161A] p-6">
+          <View style={styles.profileCard}>
             <ProfileImage />
-            <View className="items-center">
-              <Text className="font-inter-bold text-xl text-white">
-                {displayName}
-              </Text>
-              <Text className="mt-1 font-inter text-sm text-neutral-500">
-                {email}
-              </Text>
+            <View style={styles.profileInfo}>
+              <Text style={styles.displayName}>{displayName}</Text>
+              <Text style={styles.email}>{email}</Text>
             </View>
           </View>
 
           <PushNotificationPromptSection />
 
           {/* Account section */}
-          <View className="gap-3">
-            <Text className="px-1 font-inter text-xs uppercase tracking-wider text-neutral-500">
-              Account
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
             <SectionCard>
               <SettingsRow
                 icon="user"
@@ -119,10 +115,8 @@ export default function ProfileScreen() {
           </View>
 
           {/* Preferences section */}
-          <View className="gap-3">
-            <Text className="px-1 font-inter text-xs uppercase tracking-wider text-neutral-500">
-              Preferences
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Preferences</Text>
             <SectionCard>
               <SettingsRow
                 icon="dollar-sign"
@@ -140,10 +134,8 @@ export default function ProfileScreen() {
           </View>
 
           {/* Support */}
-          <View className="gap-3">
-            <Text className="px-1 font-inter text-xs uppercase tracking-wider text-neutral-500">
-              Support
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Support</Text>
             <SectionCard>
               <SettingsRow icon="help-circle" title="Help center" />
               <SettingsRow icon="shield" title="Privacy policy" />
@@ -162,10 +154,8 @@ export default function ProfileScreen() {
           </SectionCard>
 
           {/* Danger zone */}
-          <View className="gap-3">
-            <Text className="px-1 font-inter text-xs uppercase tracking-wider text-red-400/80">
-              Danger zone
-            </Text>
+          <View style={styles.section}>
+            <Text style={styles.dangerSectionTitle}>Danger zone</Text>
             <SectionCard>
               <SettingsRow
                 icon="trash-2"
@@ -177,7 +167,7 @@ export default function ProfileScreen() {
             </SectionCard>
           </View>
 
-          <Text className="text-center font-inter text-xs text-neutral-600">
+          <Text style={styles.versionText}>
             Subora · v{Constants.expoConfig?.version ?? "1.0.0"}
           </Text>
         </Animated.ScrollView>
@@ -220,3 +210,59 @@ export default function ProfileScreen() {
     </Stack.Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: getNativeDefault("background"),
+  },
+  scrollView: {
+    flex: 1,
+  },
+  profileCard: {
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    padding: 24,
+  },
+  profileInfo: {
+    alignItems: "center",
+  },
+  displayName: {
+    ...Typography.titleBold,
+    color: getNativeDefault("text"),
+  },
+  email: {
+    marginTop: 4,
+    ...Typography.base,
+    color: getNativeDefault("secondaryText"),
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    paddingHorizontal: 4,
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    color: "#737373",
+  },
+  dangerSectionTitle: {
+    paddingHorizontal: 4,
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    color: "rgba(248, 113, 113, 0.8)",
+  },
+  versionText: {
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: "#525252",
+  },
+});

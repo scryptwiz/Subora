@@ -25,6 +25,13 @@ function LiquidGlassTabLayout() {
         <NativeTabs.Trigger.Icon sf="house.fill" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="subscriptions">
+        <NativeTabs.Trigger.Label hidden>
+          Subscriptions
+        </NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="list.bullet" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label hidden>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.fill" />
@@ -42,13 +49,6 @@ function LiquidGlassTabLayout() {
       >
         <NativeTabs.Trigger.Label hidden>Create</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="plus" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="subscriptions">
-        <NativeTabs.Trigger.Label hidden>
-          Subscriptions
-        </NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="list.bullet" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

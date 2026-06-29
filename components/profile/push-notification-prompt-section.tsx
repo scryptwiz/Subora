@@ -1,26 +1,21 @@
 import { useNotificationPermission } from "@/contexts/notification-permission-context";
+import { getNativeDefault } from "@/theme/colors";
+import { Typography } from "@/theme/typography";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
 
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return (
-    <View className="overflow-hidden rounded-2xl border border-[#1F1F22] bg-[#16161A]">
-      {children}
-    </View>
-  );
+  return <View style={styles.card}>{children}</View>;
 }
 
-/**
- * Profile-only callout when OS notification permission is off; includes recovery after “Don’t allow”.
- */
 export function PushNotificationPromptSection() {
   const {
     permissionStatus,
@@ -36,10 +31,6 @@ export function PushNotificationPromptSection() {
       void refresh();
     }, [refresh]),
   );
-
-  if (Platform.OS === "web" || !showEnableNotificationsCue) {
-    return null;
-  }
 
   const onPrimaryPress = async () => {
     setBusy(true);
@@ -64,23 +55,17 @@ export function PushNotificationPromptSection() {
       : "Get renewal reminders on this device. You can change this anytime in Settings.";
 
   return (
-    <View className="gap-3">
-      <Text className="px-1 font-inter text-xs uppercase tracking-wider text-amber-500/90">
-        Push notifications
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Push notifications</Text>
       <SectionCard>
-        <View className="gap-3 px-4 py-4">
-          <View className="flex-row items-start gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15">
+        <View style={styles.cardContent}>
+          <View style={styles.row}>
+            <View style={styles.iconContainer}>
               <Feather name="bell" size={18} color="#FBBF24" />
             </View>
-            <View className="min-w-0 flex-1">
-              <Text className="font-inter-medium text-base text-white">
-                Enable notifications
-              </Text>
-              <Text className="mt-1 font-inter text-xs leading-5 text-neutral-400">
-                {subtitle}
-              </Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>Enable notifications</Text>
+              <Text style={styles.subtitle}>{subtitle}</Text>
             </View>
           </View>
           <Pressable
@@ -88,15 +73,12 @@ export function PushNotificationPromptSection() {
             disabled={busy}
             accessibilityRole="button"
             accessibilityLabel={primaryLabel}
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-white py-3.5"
-            style={({ pressed }) => (pressed ? { opacity: 0.9 } : undefined)}
+            style={styles.button}
           >
             {busy ? (
-              <ActivityIndicator color="#111111" />
+              <ActivityIndicator color={getNativeDefault("text")} />
             ) : (
-              <Text className="font-inter-medium text-base text-[#111111]">
-                {primaryLabel}
-              </Text>
+              <Text style={styles.buttonText}>{primaryLabel}</Text>
             )}
           </Pressable>
         </View>
@@ -104,3 +86,67 @@ export function PushNotificationPromptSection() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 12,
+  },
+  sectionTitle: {
+    paddingHorizontal: 4,
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    color: "rgba(245, 158, 11, 0.9)",
+  },
+  card: {
+    overflow: "hidden",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+  },
+  cardContent: {
+    gap: 12,
+    padding: 16,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  iconContainer: {
+    height: 40,
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+  },
+  textContainer: {
+    minWidth: 0,
+    flex: 1,
+  },
+  title: {
+    ...Typography.bodyMedium,
+    color: getNativeDefault("text"),
+  },
+  subtitle: {
+    marginTop: 4,
+    ...Typography.small,
+    color: getNativeDefault("secondaryText"),
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    backgroundColor: getNativeDefault("tertiaryBackground"),
+    paddingVertical: 14,
+  },
+  buttonText: {
+    ...Typography.bodyMedium,
+    color: getNativeDefault("text"),
+  },
+});
