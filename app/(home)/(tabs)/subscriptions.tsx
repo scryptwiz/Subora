@@ -1,6 +1,9 @@
+import { SubscriptionsSkeleton } from "@/components/skeletons/subscriptions-skeleton";
 import AddSubscriptionBtn from "@/components/subscriptions/AddSubscriptionBtn";
 import EmptySubsState from "@/components/subscriptions/empty-subs-state";
 import FilterPill, { Filter } from "@/components/subscriptions/FilterPill";
+import { PeriodPill } from "@/components/subscriptions/PeriodPill";
+import { SwipeableSubscriptionRow } from "@/components/subscriptions/swipeable-subscription-row";
 import { usePreferences } from "@/contexts/preferences-context";
 import { useSubscriptions } from "@/contexts/subscriptions-context";
 import { useConvertedSpendTotals } from "@/hooks/use-converted-totals";
@@ -8,6 +11,7 @@ import {
   servicesSpendHeadline,
   type ServicesSpendPeriod,
 } from "@/lib/services-spend-headline";
+import { Subscription } from "@/lib/subscriptions";
 import { getNativeDefault } from "@/theme/colors";
 import { Typography } from "@/theme/typography";
 import { Feather } from "@expo/vector-icons";
@@ -23,10 +27,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SubscriptionsSkeleton } from "../../components/skeletons/subscriptions-skeleton";
-import { PeriodPill } from "@/components/subscriptions/PeriodPill";
-import { SwipeableSubscriptionRow } from "../../components/subscriptions/swipeable-subscription-row";
-import { type Subscription } from "../../lib/subscriptions";
 
 export interface FilterOption {
   id: Filter;

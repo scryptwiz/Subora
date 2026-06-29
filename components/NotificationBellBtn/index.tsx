@@ -5,7 +5,7 @@ import { Pressable } from "react-native";
 export default function NotificationBellBtn({ size = 18 }: { size?: number }) {
   return (
     <Pressable
-      onPress={() => router.push("/(home)/notifications")}
+      onPress={() => router.push("/(home)/Notifications")}
       accessibilityRole="button"
       accessibilityLabel="Notifications"
       className="h-11 w-11 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]"

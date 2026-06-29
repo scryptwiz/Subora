@@ -1,4 +1,4 @@
-import { FilterOption } from "@/app/(home)/subscriptions";
+import { FilterOption } from "@/app/(home)/(tabs)/subscriptions";
 import { getNativeDefault } from "@/theme/colors";
 import { Typography } from "@/theme/typography";
 import { Pressable, StyleSheet, Text } from "react-native";

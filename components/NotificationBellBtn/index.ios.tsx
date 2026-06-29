@@ -14,7 +14,7 @@ export default function NotificationBellBtn() {
   return (
     <Host colorScheme="dark" matchContents>
       <Button
-        onPress={() => router.push("/(home)/notifications")}
+        onPress={() => router.push("/(home)/Notifications")}
         modifiers={[
           clipShape("circle"),
           buttonStyle(isLiquidGlassAvailable() ? "glass" : "bordered"),

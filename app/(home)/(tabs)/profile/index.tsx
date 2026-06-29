@@ -9,13 +9,12 @@ import { SettingsRow } from "@/components/settings/SettingsRow";
 import { SectionCard } from "@/components/settings/SettingsSectionCard";
 import { getCurrencyOption } from "@/constants/currencies";
 import { usePreferences } from "@/contexts/preferences-context";
-import { useFunAvatar } from "@/hooks/use-fun-avatar";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
 import { useUser } from "@clerk/expo";
 import Constants from "expo-constants";
 import { Stack, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Alert, Animated, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -23,8 +22,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useUser();
-  const funAvatarUrl = useFunAvatar();
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const [scrollY] = useState(() => new Animated.Value(0));
 
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -115,7 +113,7 @@ export default function ProfileScreen() {
                 icon="bell"
                 title="Reminders"
                 subtitle="Renewal alerts"
-                onPress={() => router.push("/(home)/notifications")}
+                onPress={() => router.push("/(home)/Notifications")}
               />
             </SectionCard>
           </View>

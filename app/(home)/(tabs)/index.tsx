@@ -173,7 +173,7 @@ export default function DashboardScreen() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Upcoming</Text>
-            <Link href="/(home)/subscriptions" asChild>
+            <Link href="/(home)/(tabs)/subscriptions" asChild>
               <Pressable hitSlop={8}>
                 <Text style={styles.showAllText}>Show all</Text>
               </Pressable>

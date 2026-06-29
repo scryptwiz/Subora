@@ -122,7 +122,7 @@ export default function ProfileScreenIOS() {
             {/* Preferences Section */}
             <Section>
               <Button
-                onPress={() => router.push("/(home)/notifications")}
+                onPress={() => router.push("/(home)/Notifications")}
                 modifiers={[buttonStyle("plain")]}
               >
                 <HStack spacing={12}>

@@ -84,6 +84,12 @@ export default function TabsLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="subscriptions"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </View>
   );

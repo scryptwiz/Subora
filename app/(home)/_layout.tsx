@@ -72,7 +72,7 @@ export default function Layout() {
                 animation: "slide_from_bottom",
               }}
             />
-            <Stack.Screen name="notifications" />
+            <Stack.Screen name="Notifications" />
           </Stack>
         </SubscriptionsProvider>
       </NotificationPermissionProvider>

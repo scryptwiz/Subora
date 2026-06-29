@@ -17,8 +17,9 @@ const isGlassAvailable = isLiquidGlassAvailable();
 
 /** ─── Liquid-Glass NativeTabs (iOS 26+) ─────────────────────────── */
 function LiquidGlassTabLayout() {
+  const router = useRouter();
   return (
-    <NativeTabs>
+    <NativeTabs minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label hidden>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="house.fill" />
@@ -26,12 +27,28 @@ function LiquidGlassTabLayout() {
 
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label hidden>Profile</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.crop.circle.fill" />
+        <NativeTabs.Trigger.Icon sf="person.fill" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="create" role="search">
+      <NativeTabs.Trigger
+        name="create"
+        role="search"
+        disabled
+        listeners={{
+          tabPress: () => {
+            router.push("/(home)/NewSubscription");
+          },
+        }}
+      >
         <NativeTabs.Trigger.Label hidden>Create</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="plus.circle.fill" />
+        <NativeTabs.Trigger.Icon sf="plus" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="subscriptions">
+        <NativeTabs.Trigger.Label hidden>
+          Subscriptions
+        </NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="list.bullet" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
