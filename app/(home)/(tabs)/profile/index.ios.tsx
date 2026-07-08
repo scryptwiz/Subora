@@ -1,4 +1,5 @@
 import CurrencyPicker from "@/components/profile/CurrencyPicker.tsx/index.ios";
+import { ExportDataModal } from "@/components/profile/ExportDataModal";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
@@ -30,11 +31,13 @@ import {
 import Constants from "expo-constants";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, Stack } from "expo-router";
+import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreenIOS() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
+  const [exportDataOpen, setExportDataOpen] = useState(false);
 
   const displayName = profileDisplayName(user);
   const email = user?.primaryEmailAddress?.emailAddress ?? "—";
@@ -136,7 +139,10 @@ export default function ProfileScreenIOS() {
                 </HStack>
               </Button>
 
-              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
+              <Button
+                onPress={() => setExportDataOpen(true)}
+                modifiers={[buttonStyle("plain")]}
+              >
                 <HStack spacing={12}>
                   <SwiftUIImage
                     systemName="arrow.down.doc.fill"
@@ -291,6 +297,10 @@ export default function ProfileScreenIOS() {
               </HStack>
             </Section>
           </Form>
+          <ExportDataModal
+            visible={exportDataOpen}
+            onClose={() => setExportDataOpen(false)}
+          />
         </Host>
         {/* <DeleteAccountModal
           visible={deleteOpen}

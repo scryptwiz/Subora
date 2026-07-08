@@ -1,7 +1,7 @@
 import { CurrencyPickerModal } from "@/components/profile/CurrencyPicker.tsx";
 import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
 import { EditProfileModal } from "@/components/profile/edit-profile-modal";
-import { ExportDataModal } from "@/components/profile/export-data-modal";
+import { ExportDataModal } from "@/components/profile/ExportDataModal";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { PushNotificationPromptSection } from "@/components/profile/push-notification-prompt-section";
 import { ScrollRevealTopChrome } from "@/components/scroll-reveal-top-chrome";
