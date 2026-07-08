@@ -1,4 +1,4 @@
-import { CurrencyPickerModal } from "@/components/profile/currency-picker-modal";
+import { CurrencyPickerModal } from "@/components/profile/CurrencyPicker.tsx";
 import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
 import { EditProfileModal } from "@/components/profile/edit-profile-modal";
 import { ExportDataModal } from "@/components/profile/export-data-modal";

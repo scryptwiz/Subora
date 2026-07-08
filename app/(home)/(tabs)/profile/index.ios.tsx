@@ -1,3 +1,4 @@
+import CurrencyPicker from "@/components/profile/CurrencyPicker.tsx/index.ios";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { useProfileActions } from "@/hooks/use-profile-actions";
 import { profileDisplayName } from "@/lib/profile-display-name";
@@ -53,7 +54,7 @@ export default function ProfileScreenIOS() {
         headerShown: true,
         headerLargeTitle: true,
         headerTransparent: isLiquidGlassAvailable(),
-        headerTintColor: getNativeDefault("text"),
+        headerTitleStyle: { color: getNativeDefault("text") },
         title: "Settings",
         contentStyle: { backgroundColor: getNativeDefault("background") },
       }}
@@ -103,20 +104,8 @@ export default function ProfileScreenIOS() {
                 </HStack>
               </Button>
 
-              <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
-                <HStack spacing={12}>
-                  <Text>Currency</Text>
-                  <Spacer />
-                  <SwiftUIImage
-                    systemName="chevron.right"
-                    size={16}
-                    modifiers={[
-                      foregroundStyle(getNativeDefault("secondaryText")),
-                      imageScale("small"),
-                    ]}
-                  />
-                </HStack>
-              </Button>
+              {/* Currency */}
+              <CurrencyPicker />
             </Section>
 
             {/* Preferences Section */}
