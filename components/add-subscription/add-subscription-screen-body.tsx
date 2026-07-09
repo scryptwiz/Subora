@@ -9,59 +9,27 @@ import { PresetChips } from "@/components/add-subscription/preset-chips";
 import { PriceAndCycleFields } from "@/components/add-subscription/price-and-cycle-fields";
 import { SaveSubscriptionButton } from "@/components/add-subscription/save-subscription-button";
 import { formatBillingDate } from "@/lib/billing-date";
-import type { BrandPreset } from "@/lib/brand-presets";
-import type { BillingCycle } from "@/lib/subscriptions";
+import { searchPresets } from "@/lib/subscriptions";
+import { getNativeDefault } from "@/theme/colors";
+import { FontFamilies } from "@/theme/typography";
 import { useRouter } from "expo-router";
-import React, { useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
 
 type AddSubscriptionScreenBodyProps = {
-  isEditing: boolean;
-  isValid: boolean;
-  saving: boolean;
   setEmojiPickerOpen: (v: boolean) => void;
-  suggestions: BrandPreset[];
-  price: string;
-  setPrice: (v: string) => void;
-  cycle: BillingCycle;
-  setCycle: (v: BillingCycle) => void;
-  currency: string;
-  setCurrency: (v: string) => void;
-  renewalDate: Date;
-  minRenewalDate: Date;
-  setRenewalDate: (d: Date) => void;
-  reminderOffsets: number[];
-  setReminderOffsets: React.Dispatch<React.SetStateAction<number[]>>;
-  priceNumber: number;
-  onSave: () => void;
 };
 
 export function AddSubscriptionScreenBody({
-  isEditing,
-  isValid,
-  saving,
   setEmojiPickerOpen,
-  suggestions,
-  price,
-  setPrice,
-  cycle,
-  setCycle,
-  currency,
-  setCurrency,
-  renewalDate,
-  minRenewalDate,
-  setRenewalDate,
-  reminderOffsets,
-  setReminderOffsets,
-  priceNumber,
-  onSave,
 }: AddSubscriptionScreenBodyProps) {
   const router = useRouter();
   const priceRef = useRef<TextInput>(null);
@@ -74,11 +42,34 @@ export function AddSubscriptionScreenBody({
     setDomainInput,
     clearLogoIfNameEdited,
     applyPreset,
+    price,
+    setPrice,
+    cycle,
+    setCycle,
+    currency,
+    setCurrency,
+    renewalDate,
+    setRenewalDate,
+    reminderOffsets,
+    setReminderOffsets,
+    saving,
+    isEditing,
+    priceNumber,
+    isValid,
+    handleSave,
   } = useBrandPreview();
+
+  const minRenewalDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const suggestions = useMemo(() => searchPresets(name, 5), [name]);
 
   return (
     <ScrollView
-      className="flex-1"
+      style={styles.scrollView}
       contentContainerStyle={{
         paddingTop: 24,
         paddingHorizontal: 20,
@@ -93,17 +84,17 @@ export function AddSubscriptionScreenBody({
         isValid={isValid}
         saving={saving}
         onClose={() => router.back()}
-        onSave={onSave}
+        onSave={handleSave}
       />
       {!isEditing ? (
         <Pressable
           onPress={() => router.push("/(home)/import-subscriptions-from-pdf")}
-          className="rounded-2xl border border-[#3F3F46] bg-[#18181B] px-4 py-3 active:opacity-80"
+          style={styles.pdfButton}
         >
-          <Text className="font-inter text-sm font-semibold text-white">
+          <Text style={styles.pdfButtonText}>
             Import from PDF (receipt or statement)
           </Text>
-          <Text className="mt-1 font-inter text-xs leading-4 text-[#A1A1AA]">
+          <Text style={styles.pdfButtonSubtitle}>
             Subora does not store the file.
           </Text>
         </Pressable>
@@ -111,7 +102,7 @@ export function AddSubscriptionScreenBody({
 
       <BrandPreviewCard onPressLogo={() => setEmojiPickerOpen(true)} />
 
-      <View className="gap-3">
+      <View style={styles.inputGroup}>
         <FieldLabel icon="tag" label="Service" />
         <TextInput
           value={name}
@@ -120,7 +111,7 @@ export function AddSubscriptionScreenBody({
           placeholderTextColor="#52525B"
           autoCapitalize="words"
           autoCorrect={false}
-          className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+          style={styles.input}
           returnKeyType="next"
           onSubmitEditing={() => priceRef.current?.focus()}
         />
@@ -132,7 +123,7 @@ export function AddSubscriptionScreenBody({
         />
       </View>
 
-      <View className="gap-3">
+      <View style={styles.inputGroup}>
         <FieldLabel
           icon="globe"
           label="Website (optional, used for the logo)"
@@ -145,7 +136,7 @@ export function AddSubscriptionScreenBody({
           keyboardType={Platform.OS === "ios" ? "url" : "default"}
           autoCapitalize="none"
           autoCorrect={false}
-          className="h-14 rounded-2xl border border-[#27272A] bg-[#16161A] px-4 font-inter text-base leading-[18px] text-white"
+          style={styles.input}
         />
       </View>
 
@@ -175,8 +166,49 @@ export function AddSubscriptionScreenBody({
         priceNumber={priceNumber}
         currency={currency}
         cycle={cycle}
-        onPress={onSave}
+        onPress={handleSave}
       />
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  pdfButton: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  pdfButtonText: {
+    fontFamily: FontFamilies.medium,
+    fontSize: 14,
+    color: getNativeDefault("text"),
+  },
+  pdfButtonSubtitle: {
+    marginTop: 4,
+    fontFamily: FontFamilies.regular,
+    fontSize: 12,
+    color: getNativeDefault("secondaryText"),
+    lineHeight: 16,
+  },
+  inputGroup: {
+    gap: 12,
+  },
+  input: {
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    paddingHorizontal: 16,
+    fontFamily: FontFamilies.regular,
+    fontSize: 16,
+    lineHeight: 18,
+    color: getNativeDefault("text"),
+  },
+});

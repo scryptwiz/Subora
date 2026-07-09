@@ -1,6 +1,9 @@
 import { ServicesSpendPeriod } from "@/lib/services-spend-headline";
+import { getNativeDefault } from "@/theme/colors";
+import { FontFamilies } from "@/theme/typography";
 import { Feather } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { LargeAddSubscriptionBtn } from "./AddSubscriptionBtn";
 
 type EmptyReason = "search" | "none" | "billing" | "status";
 const BILLING_LABEL: Record<ServicesSpendPeriod, string> = {
@@ -40,32 +43,49 @@ export default function EmptySubsState({
     reason === "none" || reason === "billing" || reason === "status";
 
   return (
-    <View className="mt-16 items-center px-6">
-      <View className="h-16 w-16 items-center justify-center rounded-full border border-[#27272A] bg-[#16161A]">
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>
         <Feather
           name={reason === "search" ? "search" : "inbox"}
           size={22}
-          color="#52525B"
+          color={getNativeDefault("secondaryText")}
         />
       </View>
-      <Text className="mt-5 text-center font-inter-bold text-lg text-white">
-        {title}
-      </Text>
-      <Text className="mt-2 text-center font-inter text-sm text-neutral-500">
-        {subtitle}
-      </Text>
-      {showAdd ? (
-        <Pressable
-          onPress={onAdd}
-          className="mt-6 flex-row items-center gap-2 rounded-2xl bg-white px-5 py-3"
-          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-        >
-          <Feather name="plus" size={16} color="#111111" />
-          <Text className="font-inter-medium text-sm text-[#111111]">
-            Add subscription
-          </Text>
-        </Pressable>
-      ) : null}
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
+      {showAdd ? <LargeAddSubscriptionBtn onAdd={onAdd} /> : null}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 64,
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: getNativeDefault("separator"),
+    backgroundColor: getNativeDefault("secondaryBackground"),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    marginTop: 20,
+    textAlign: "center",
+    fontFamily: FontFamilies.bold,
+    fontSize: 18,
+    color: getNativeDefault("text"),
+  },
+  subtitle: {
+    marginTop: 8,
+    textAlign: "center",
+    fontFamily: FontFamilies.regular,
+    fontSize: 14,
+    color: getNativeDefault("secondaryText"),
+  },
+});
