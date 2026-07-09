@@ -1,6 +1,6 @@
 import { CurrencyPickerModal } from "@/components/profile/CurrencyPicker.tsx";
 import { DeleteAccountModal } from "@/components/profile/DeleteAcountModal.tsx";
-import { EditProfileModal } from "@/components/profile/edit-profile-modal";
+import { EditProfileModal } from "@/components/profile/EditProfileModal";
 import { ExportDataModal } from "@/components/profile/ExportDataModal";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { PushNotificationPromptSection } from "@/components/profile/push-notification-prompt-section";

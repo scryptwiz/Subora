@@ -1,5 +1,6 @@
 import CurrencyPicker from "@/components/profile/CurrencyPicker.tsx/index.ios";
 import { DeleteAccountModalIOS } from "@/components/profile/DeleteAcountModal.tsx/index.ios";
+import { EditProfileModal } from "@/components/profile/EditProfileModal";
 import { ExportDataModal } from "@/components/profile/ExportDataModal";
 import ProfileImage from "@/components/profile/ProfileImage";
 import { useProfileActions } from "@/hooks/use-profile-actions";
@@ -40,6 +41,7 @@ export default function ProfileScreenIOS() {
   const insets = useSafeAreaInsets();
   const [exportDataOpen, setExportDataOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const displayName = profileDisplayName(user);
   const email = user?.primaryEmailAddress?.emailAddress ?? "—";
@@ -67,7 +69,10 @@ export default function ProfileScreenIOS() {
         >
           {/* Profile Card Section */}
           <Section>
-            <Button onPress={() => {}} modifiers={[buttonStyle("plain")]}>
+            <Button
+              onPress={() => setEditProfileOpen(true)}
+              modifiers={[buttonStyle("plain")]}
+            >
               <HStack alignment="center" spacing={16}>
                 <HStack
                   modifiers={[
@@ -290,6 +295,10 @@ export default function ProfileScreenIOS() {
           email={email}
           visible={deleteOpen}
           onClose={() => setDeleteOpen(false)}
+        />
+        <EditProfileModal
+          visible={editProfileOpen}
+          onClose={() => setEditProfileOpen(false)}
         />
       </Host>
     </Stack.Screen>
