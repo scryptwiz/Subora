@@ -25,6 +25,7 @@ import {
   presentationDetents,
   presentationDragIndicator,
 } from "@expo/ui/swift-ui/modifiers";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { useState } from "react";
 import { Alert } from "react-native";
 
@@ -38,6 +39,7 @@ export function ExportDataModal({ visible, onClose }: Props) {
   const { displayCurrency } = usePreferences();
   const converted = useConvertedSpendTotals();
   const [exporting, setExporting] = useState(false);
+  const isGlassAvailable = isLiquidGlassAvailable();
 
   const handleExport = async () => {
     if (exporting) return;
@@ -107,7 +109,7 @@ export function ExportDataModal({ visible, onClose }: Props) {
             alignment="leading"
             modifiers={[
               padding({ all: 16 }),
-              background(getNativeDefault("background")),
+              background(getNativeDefault("secondaryBackground")),
               cornerRadius(16),
             ]}
           >
@@ -138,7 +140,12 @@ export function ExportDataModal({ visible, onClose }: Props) {
 
           <Button
             onPress={() => (exporting ? undefined : handleExport())}
-            modifiers={[buttonStyle("glassProminent"), cornerRadius(16)]}
+            modifiers={[
+              buttonStyle(
+                isGlassAvailable ? "glassProminent" : "borderedProminent",
+              ),
+              cornerRadius(16),
+            ]}
           >
             <HStack
               spacing={8}
