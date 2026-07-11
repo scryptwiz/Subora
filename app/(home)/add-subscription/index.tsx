@@ -7,15 +7,20 @@ import { EmojiPickerModal } from "@/components/add-subscription/emoji-picker-mod
 import { getNativeDefault } from "@/theme/colors";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function AddSubscriptionScreenInner() {
+  const insets = useSafeAreaInsets();
   const { emoji, handleEmojiSelect } = useBrandPreview();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
+      behavior={"padding"}
+      style={[
+        styles.container,
+        { paddingTop: Platform.OS === "android" ? insets.top : 0 },
+      ]}
     >
       <View style={styles.content}>
         <AddSubscriptionScreenBody setEmojiPickerOpen={setEmojiPickerOpen} />
