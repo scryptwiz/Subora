@@ -62,6 +62,7 @@ function AddSubscriptionFormInner() {
   const {
     name,
     setName,
+    domainInput,
     setDomainInput,
     price,
     setPrice,
@@ -81,6 +82,7 @@ function AddSubscriptionFormInner() {
 
   const nameState = useNativeState(name);
   const priceState = useNativeState(price);
+  const domainState = useNativeState(domainInput);
 
   useEffect(() => {
     nameState.value = name;
@@ -89,6 +91,10 @@ function AddSubscriptionFormInner() {
   useEffect(() => {
     priceState.value = price;
   }, [price]);
+
+  useEffect(() => {
+    domainState.value = domainInput;
+  }, [domainInput]);
 
   const toggle = (offset: number) => {
     if (reminderOffsets.includes(offset)) {
@@ -109,6 +115,7 @@ function AddSubscriptionFormInner() {
           headerLargeTitle: true,
           headerTransparent: isLiquidGlassAvailable(),
           headerTitleStyle: { color: getNativeDefault("text") },
+          headerLargeTitleStyle: { color: getNativeDefault("text") },
           title: isEditing ? "Edit subscription" : "Add subscription",
         }}
       />
@@ -143,7 +150,11 @@ function AddSubscriptionFormInner() {
             />
             <TextField
               placeholder="netflix.com (Optional)"
-              onTextChange={setDomainInput}
+              text={domainState}
+              onTextChange={(val) => {
+                domainState.value = val;
+                setDomainInput(val);
+              }}
               modifiers={[
                 textInputAutocapitalization("never"),
                 autocorrectionDisabled(true),

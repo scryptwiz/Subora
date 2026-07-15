@@ -50,6 +50,8 @@ export default function Layout() {
                 headerLargeTitle: true,
                 headerTransparent: isLiquidGlassAvailable(),
                 headerTintColor: getNativeDefault("text"),
+                headerTitleStyle: { color: getNativeDefault("text") },
+                headerLargeTitleStyle: { color: getNativeDefault("text") },
                 title: "Add Subscription",
                 presentation: "formSheet",
                 animation: "slide_from_bottom",
@@ -60,6 +62,8 @@ export default function Layout() {
               options={{
                 title: "",
                 headerTintColor: getNativeDefault("text"),
+                headerTitleStyle: { color: getNativeDefault("text") },
+                headerLargeTitleStyle: { color: getNativeDefault("text") },
                 headerLargeTitle: true,
                 presentation: "formSheet",
                 animation: "slide_from_bottom",

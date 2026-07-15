@@ -5,7 +5,7 @@ import { useSupabase } from "@/hooks/use-supabase";
 import { saveSubscriptionReminders } from "@/lib/add-subscription/save-reminders";
 import { dateToBillingIso } from "@/lib/billing-date";
 import { useAuth } from "@clerk/expo";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo } from "react";
 import { Alert } from "react-native";
 import { useSubscriptionFormStore } from "./store";
@@ -22,12 +22,16 @@ export const useBrandPreview = () => {
   }, [store.price]);
 
   const isValid = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return (
       store.name.trim().length > 0 &&
       Number.isFinite(priceNumber) &&
-      priceNumber > 0
+      priceNumber > 0 &&
+      store.renewalDate >= today
     );
-  }, [store.name, priceNumber]);
+  }, [store.name, priceNumber, store.renewalDate]);
 
   const handleSave = useCallback(async () => {
     if (!isValid || store.saving) return;
@@ -175,6 +179,21 @@ export function BrandPreviewProvider({
 
     const next = new Date(editingSubscription.nextRenewal);
     const nextRenewal = !Number.isNaN(next.getTime()) ? next : new Date();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Roll forward to future if it's in the past
+    if (nextRenewal < today) {
+      const cycle = editingSubscription.billingCycle;
+      while (nextRenewal < today) {
+        if (cycle === "year") {
+          nextRenewal.setFullYear(nextRenewal.getFullYear() + 1);
+        } else {
+          nextRenewal.setMonth(nextRenewal.getMonth() + 1);
+        }
+      }
+    }
 
     store.hydrateForm({
       name: editingSubscription.name,
