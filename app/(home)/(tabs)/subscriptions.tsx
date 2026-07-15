@@ -102,17 +102,19 @@ export default function SubscriptionsScreen() {
   const handleToggle = async (id: string, next: boolean) => {
     try {
       await setSubscriptionActive(id, next);
-    } catch {
-      // Keep UI optimistic rollback; refetch restores state on failure.
-    }
+    } catch {}
   };
 
-  const handleDelete = (sub: Subscription) => {
+  const handleDelete = (sub: Subscription, cancel: () => void) => {
     Alert.alert(
       `Delete ${sub.name}?`,
       "This will remove the subscription from your tracker. This cannot be undone.",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: cancel,
+        },
         {
           text: "Delete",
           style: "destructive",
@@ -123,10 +125,12 @@ export default function SubscriptionsScreen() {
               const message =
                 e instanceof Error ? e.message : "Could not delete.";
               Alert.alert("Delete failed", message);
+              cancel();
             }
           },
         },
       ],
+      { onDismiss: cancel },
     );
   };
 
@@ -231,7 +235,7 @@ export default function SubscriptionsScreen() {
               subscription={sub}
               onPress={() => handleEdit(sub)}
               onToggleActive={(next) => void handleToggle(sub.id, next)}
-              onDelete={() => handleDelete(sub)}
+              onDelete={(cancel) => handleDelete(sub, cancel)}
             />
           ))
         )}

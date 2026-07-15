@@ -1,10 +1,16 @@
 import type { Subscription } from "@/lib/subscriptions";
 import { Feather } from "@expo/vector-icons";
-import React, { useRef } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import ReanimatedSwipeable, {
-  type SwipeableMethods,
-} from "react-native-gesture-handler/ReanimatedSwipeable";
+import React, { useCallback, useRef } from "react";
+import { StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { SubscriptionRow } from "./subscription-row";
 
 type Variant = "history" | "list";
@@ -14,10 +20,19 @@ type Props = {
   variant?: Variant;
   onPress: () => void;
   onToggleActive?: (next: boolean) => void;
-  onDelete: () => void;
+  onDelete: (cancel: () => void) => void;
 };
 
-const ACTION_WIDTH = 64;
+const DELETE_THRESHOLD = 220;
+
+const SNAP_BACK_SPRING = {
+  damping: 18,
+  stiffness: 180,
+  mass: 0.5,
+  overshootClamping: true,
+};
+
+const FLY_OUT_TIMING = { duration: 260 };
 
 export function SwipeableSubscriptionRow({
   subscription,
@@ -26,75 +41,116 @@ export function SwipeableSubscriptionRow({
   onToggleActive,
   onDelete,
 }: Props) {
-  const ref = useRef<SwipeableMethods | null>(null);
+  const translateX = useSharedValue(0);
+  const isFlyingOut = useSharedValue(false);
 
-  const close = () => ref.current?.close();
+  const onDeleteRef = useRef(onDelete);
+  onDeleteRef.current = onDelete;
 
-  const renderRightActions = () => (
-    <ActionButton
-      accessibilityLabel="Delete"
-      icon="trash-2"
-      onPress={() => {
-        close();
-        onDelete();
-      }}
-    />
-  );
+  const notifyDelete = useCallback(() => {
+    const cancel = () => {
+      isFlyingOut.value = false;
+      translateX.value = withSpring(0, SNAP_BACK_SPRING);
+    };
+    onDeleteRef.current(cancel);
+  }, [isFlyingOut, translateX]);
+
+  const pan = Gesture.Pan()
+    .activeOffsetX([-8, 8])
+    .failOffsetY([-12, 12])
+    .onUpdate((e) => {
+      if (isFlyingOut.value) return;
+      translateX.value = Math.min(0, e.translationX);
+    })
+    .onEnd((e) => {
+      if (isFlyingOut.value) return;
+
+      const shouldDelete =
+        e.translationX < -DELETE_THRESHOLD ||
+        (e.velocityX < -800 && e.translationX < -80);
+
+      if (shouldDelete) {
+        isFlyingOut.value = true;
+        translateX.value = withTiming(-800, FLY_OUT_TIMING, (finished) => {
+          if (finished) {
+            runOnJS(notifyDelete)();
+          }
+        });
+      } else {
+        translateX.value = withSpring(0, SNAP_BACK_SPRING);
+      }
+    });
+
+  const rowStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const backdropStyle = useAnimatedStyle(() => {
+    const drag = Math.abs(Math.min(0, translateX.value));
+    return {
+      width: drag,
+      opacity: drag > 0.5 ? 1 : 0,
+    };
+  });
+
+  const iconStyle = useAnimatedStyle(() => {
+    const drag = Math.abs(Math.min(0, translateX.value));
+    const progress = Math.min(drag / DELETE_THRESHOLD, 1);
+    const opacity = interpolate(drag, [20, 80], [0, 1]);
+    const scale = interpolate(progress, [0, 0.3, 1], [0.7, 0.9, 1.1]);
+    return { opacity, transform: [{ scale }] };
+  });
+
+  const backdropColorStyle = useAnimatedStyle(() => {
+    const drag = Math.abs(Math.min(0, translateX.value));
+    return {
+      backgroundColor: drag >= DELETE_THRESHOLD ? "#E84040" : "#FF6B6B",
+    };
+  });
 
   return (
-    <ReanimatedSwipeable
-      ref={ref}
-      friction={1.6}
-      rightThreshold={ACTION_WIDTH * 0.6}
-      overshootRight={false}
-      renderRightActions={renderRightActions}
-      containerStyle={{ borderRadius: 16, overflow: "hidden" }}
-    >
-      <SubscriptionRow
-        subscription={subscription}
-        variant={variant}
-        onPress={onPress}
-        onToggleActive={onToggleActive}
-      />
-    </ReanimatedSwipeable>
-  );
-}
+    <View style={styles.wrapper}>
+      <Animated.View style={[styles.backdrop, backdropColorStyle, backdropStyle]}>
+        <Animated.View style={[styles.iconWrap, iconStyle]}>
+          <Feather name="trash-2" size={22} color="#FFFFFF" />
+        </Animated.View>
+      </Animated.View>
 
-function ActionButton({
-  accessibilityLabel,
-  icon,
-  onPress,
-}: {
-  accessibilityLabel: string;
-  icon: React.ComponentProps<typeof Feather>["name"];
-  onPress: () => void;
-}) {
-  return (
-    <View style={styles.actionContainer}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        style={styles.actionButton}
-      >
-        <Feather name={icon} size={24} color="#FFFFFF" />
-      </Pressable>
+      <GestureDetector gesture={pan}>
+        <Animated.View style={[styles.rowWrapper, rowStyle]}>
+          <SubscriptionRow
+            subscription={subscription}
+            variant={variant}
+            onPress={onPress}
+            onToggleActive={onToggleActive}
+          />
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  actionContainer: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    paddingLeft: 8,
+  wrapper: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 16,
   },
-  actionButton: {
-    width: ACTION_WIDTH,
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 20,
+  },
+  iconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
+  rowWrapper: {
+    zIndex: 1,
   },
 });

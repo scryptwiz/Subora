@@ -94,12 +94,16 @@ export default function DashboardScreen() {
 
   const greeting = profileDisplayName(user, "there");
 
-  const handleDelete = (sub: Subscription) => {
+  const handleDelete = (sub: Subscription, cancel: () => void) => {
     Alert.alert(
       `Delete ${sub.name}?`,
       "This will remove the subscription from your tracker. This cannot be undone.",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: cancel,
+        },
         {
           text: "Delete",
           style: "destructive",
@@ -110,10 +114,12 @@ export default function DashboardScreen() {
               const message =
                 e instanceof Error ? e.message : "Could not delete.";
               Alert.alert("Delete failed", message);
+              cancel();
             }
           },
         },
       ],
+      { onDismiss: cancel },
     );
   };
 
@@ -191,7 +197,7 @@ export default function DashboardScreen() {
                   subscription={sub}
                   variant="history"
                   onPress={() => handleEdit(sub)}
-                  onDelete={() => handleDelete(sub)}
+                  onDelete={(cancel) => handleDelete(sub, cancel)}
                 />
               ))
             )}
